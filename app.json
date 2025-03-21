@@ -25,10 +25,19 @@
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
     },
     "web": {
       "favicon": "./src/assets/images/favicon.png"
-    }
+    },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "plugins": [
+      "expo-asset",
+      "expo-font"
+    ]
   }
 }

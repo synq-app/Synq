@@ -1,9 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
-import WelcomeScreen from '../screens/FirstTimeUser/Welcome';
-import { StepOneScreen } from '../screens/FirstTimeUser/StepOne';
-import { StepTwoScreen } from '../screens/FirstTimeUser/StepTwo';
 import { ProfileScreen } from '../screens/Profile';
+import { Settings } from '../screens/Settings';
 
 const ProfileStack = createNativeStackNavigator();
 export function ProfileNavigator() {
@@ -12,10 +10,8 @@ export function ProfileNavigator() {
       screenOptions={{
         headerShown: false,
       }}>
-      <ProfileStack.Screen name="All Chats" component={ProfileScreen} options={{ headerShown: false }} />
-      <ProfileStack.Screen name="Preferences"
-        component={PreferencesScreen} options={{ headerShown: false }} />
-
+      <ProfileStack.Screen name="Profile" component={ProfileScreen} />
+      <ProfileStack.Screen name="Settings" component={Settings} />
     </ProfileStack.Navigator>
 
   )

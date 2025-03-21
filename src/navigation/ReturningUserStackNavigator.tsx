@@ -12,12 +12,37 @@ import { NetworkScreen } from '../screens/Network';
 import { ProfileScreen } from '../screens/Profile';
 import { SynqScreen } from '../screens/Synq';
 import { ChatStackNavigator } from './ChatStackNavigator';
+import WelcomeScreen from '../screens/FirstTimeUser/Welcome';
+import SignInWithEmail from '../screens/FirstTimeUser/SignInWithEmail';
+import SignInWithPhoneNumber from '../screens/FirstTimeUser/SignInWithPhoneNumber';
+import { SignUpWithEmail } from '../screens/FirstTimeUser/SignUpWithEmail';
+import { SignUpWithPhoneNumber } from '../screens/FirstTimeUser/SignUpWithPhoneNumber';
+import { StepTwoScreen } from '../screens/FirstTimeUser/StepTwo';
+import IntroToAddingConnections from '../screens/FirstTimeUser/IntroToAddingConnections';
+import { Notifications } from '../screens/Notifications';
+import { Settings } from '../screens/Settings';
+import { Explore } from '../screens/Explore';
+import AddFriendsScreen from '../screens/AddFriends';
+import { ProfileNavigator } from './ProfileNavigator';
 
 const ReturningUserStack = createNativeStackNavigator();
 export function ReturningUserStackNavigator() {
   return (
     <ReturningUserStack.Navigator>
       <ReturningUserStack.Screen name="Default" component={BottomTabNavigator} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="SignInWithEmail" component={SignInWithEmail} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="SignInWithPhoneNumber" component={SignInWithPhoneNumber} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="SignUpWithEmail" component={SignUpWithEmail} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="SignUpWithPhoneNumber" component={SignUpWithPhoneNumber} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="StepTwo" component={StepTwoScreen} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="IntroToAddingConnections" component={IntroToAddingConnections} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="Notifications" component={Notifications} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="Settings" component={Settings} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="Explore" component={Explore} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="Add Friends" component={AddFriendsScreen} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="Network" component={NetworkScreen} options={{ headerShown: false }} />
+
       <ReturningUserStack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <ReturningUserStack.Group screenOptions={{ presentation: 'modal' }}>
         <ReturningUserStack.Screen name="Modal" component={ModalScreen} />
@@ -36,7 +61,7 @@ function BottomTabNavigator() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="TabOne"
+      initialRouteName="Home"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].accent,
         headerShown: false,
@@ -77,16 +102,23 @@ function BottomTabNavigator() {
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
-      <BottomTab.Screen
+      {/* <BottomTab.Screen
         name="Network"
         component={NetworkScreen}
         options={{
           tabBarIcon: ({ color }) => <TabBarIcon name="address-book" color={color} />,
         }}
+      /> */}
+      <BottomTab.Screen
+        name="Explore"
+        component={Explore}
+        options={{
+          tabBarIcon: ({ color }) => <TabBarIcon name="map" color={color} />,
+        }}
       />
       <BottomTab.Screen
         name="Me"
-        component={ProfileScreen}
+        component={ProfileNavigator}
         options={{
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}
@@ -102,5 +134,5 @@ function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
 }) {
-  return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
+  return <FontAwesome size={22} style={{ marginBottom: -3 }} {...props} />;
 }
