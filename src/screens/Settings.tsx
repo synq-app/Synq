@@ -29,7 +29,6 @@ export const Settings = ({ navigation }: any) => {
     }, []);
 
     const toggleSwitch = () => setNotificationsEnabled(previousState => !previousState);
-    console.log('user name: ')
     return (
         <SafeAreaView >
             <View className="w-full h-full justify-end pl-14">
@@ -43,7 +42,7 @@ export const Settings = ({ navigation }: any) => {
                     <Text className='text-black text-2xl'>Preferences</Text>
                 </View>
                 <View className="flex bg-gray-900 pr-8 pb-8 rounded-t-xl gap-8">
-                    <View className="flex-row items-center gap-1">
+                    <View className="flex-row items-center gap-1 bg-transparent">
                         {profileImage ? (
                             <Image
                                 source={{ uri: profileImage }}
