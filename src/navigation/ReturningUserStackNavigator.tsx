@@ -24,6 +24,7 @@ import { Settings } from '../screens/Settings';
 import { Explore } from '../screens/Explore';
 import AddFriendsScreen from '../screens/AddFriends';
 import { ProfileNavigator } from './ProfileNavigator';
+import { AvailableFriends } from '../screens/AvailableFriends';
 
 const ReturningUserStack = createNativeStackNavigator();
 export function ReturningUserStackNavigator() {
@@ -42,6 +43,7 @@ export function ReturningUserStackNavigator() {
       <ReturningUserStack.Screen name="Explore" component={Explore} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="Add Friends" component={AddFriendsScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="Network" component={NetworkScreen} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="AvailableFriends" component={AvailableFriends} options={{ headerShown: false }} />
 
       <ReturningUserStack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <ReturningUserStack.Group screenOptions={{ presentation: 'modal' }}>
