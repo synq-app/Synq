@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, ActivityIndicator, FlatList, StyleSheet, ScrollView, TextInput, Modal, Image } from 'react-native';
 import { Text, View } from '../components/Themed';
 import axios from 'axios';
-
+import { ENV_VARS } from '../../config';
 const accentGreen = '#7DFFA6';
 
 type AuthProps = {
@@ -10,7 +10,7 @@ type AuthProps = {
 };
 
 export const Explore = ({ navigation }: AuthProps) => {
-    const yelpAPIKey = 'todo';
+    const yelpAPIKey = ENV_VARS.YELP_API_KEY;
     const yelpEndpoint = 'https://api.yelp.com/v3/businesses/search';
 
     const [recommendedActivities, setRecommendedActivities] = useState<{ name: string; rating: number; location: string; image: string }[]>([]);

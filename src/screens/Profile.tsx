@@ -129,7 +129,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           } else {
             alert("User is not authenticated.");
           }
-          alert("Image uploaded successfully!");
+          // alert("Image uploaded successfully!");
         }
       );
     } catch (error: any) {
