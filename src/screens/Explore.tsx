@@ -1,237 +1,177 @@
 import React, { useEffect, useState } from 'react';
-import { TouchableOpacity, ActivityIndicator, FlatList, StyleSheet, ScrollView, TextInput, Modal, Image } from 'react-native';
+import {
+  TouchableOpacity,
+  ActivityIndicator,
+  FlatList,
+  ScrollView,
+  TextInput,
+  Modal,
+  Image,
+} from 'react-native';
 import { Text, View } from '../components/Themed';
 import axios from 'axios';
 import { ENV_VARS } from '../../config';
+
 const accentGreen = '#7DFFA6';
 
-type AuthProps = {
-    navigation: any;
-};
+interface Activity {
+  name: string;
+  rating: number;
+  location: string;
+  image: string;
+}
 
-export const Explore = ({ navigation }: AuthProps) => {
-    const yelpAPIKey = ENV_VARS.YELP_API_KEY;
-    const yelpEndpoint = 'https://api.yelp.com/v3/businesses/search';
+export const Explore = ({ navigation }: { navigation: any }) => {
+  const [recommendedActivities, setRecommendedActivities] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('things to do');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-    const [recommendedActivities, setRecommendedActivities] = useState<{ name: string; rating: number; location: string; image: string }[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [selectedCategory, setSelectedCategory] = useState<string>('fun activities');
-    const [searchTerm, setSearchTerm] = useState<string>('');
-    const [selectedActivity, setSelectedActivity] = useState<{ name: string; rating: number; location: string; image: string } | null>(null);
-    const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const fetchActivityRecommendations = async (category: string) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get('https://api.foursquare.com/v3/places/search', {
+        params: {
+          query: category,
+          near: 'Washington, DC',
+          limit: 5,
+        },
+        headers: {
+          Authorization: ENV_VARS.FOURSQUARE_API_KEY,
+          accept: 'application/json',
+        },
+      });
 
-    const fetchActivityRecommendations = async (category: string) => {
-        setIsLoading(true);
+      const places = response.data.results;
 
-        try {
-            const response = await axios.get(yelpEndpoint, {
-                params: {
-                    term: category,
-                    location: 'Washington, DC',
-                    limit: 5,
-                },
+      const placesWithImages = await Promise.all(
+        places.map(async (place: any) => {
+          let imageUrl = '';
+
+          try {
+            const photoRes = await axios.get(
+              `https://api.foursquare.com/v3/places/${place.fsq_id}/photos`,
+              {
                 headers: {
-                    Authorization: `Bearer ${yelpAPIKey}`,
+                  Authorization: ENV_VARS.FOURSQUARE_API_KEY,
+                  accept: 'application/json',
                 },
-            });
-            const activities = response.data.businesses.map((business: any) => ({
-                name: business.name,
-                rating: business.rating,
-                location: business.location.address1 || 'Unknown location',
-                image: business.image_url || 'https://via.placeholder.com/300',
-            }));
+              }
+            );
 
-            setRecommendedActivities(activities);
-            setIsLoading(false);
-        } catch (error) {
-            console.error('Error fetching activities from Yelp:', error);
-            setIsLoading(false);
-        }
-    };
+            const photo = photoRes.data[0];
+            if (photo) {
+              imageUrl = `${photo.prefix}original${photo.suffix}`;
+            }
+          } catch {
+            console.warn(`No photo found for ${place.name}`);
+          }
 
-    useEffect(() => {
-        fetchActivityRecommendations(selectedCategory);
-    }, [selectedCategory]);
+          if (!imageUrl && place.categories?.[0]?.icon) {
+            const icon = place.categories[0].icon;
+            imageUrl = `${icon.prefix}bg_64${icon.suffix}`;
+          }
 
-    const handleCategoryChange = (category: string) => {
-        setSelectedCategory(category);
-    };
+          if (!imageUrl) {
+            imageUrl = 'https://via.placeholder.com/300';
+          }
 
-    const handleSearchChange = (text: string) => {
-        setSearchTerm(text);
-    };
+          return {
+            name: place.name,
+            rating: 4.0,
+            location: place.location?.formatted_address || 'Unknown location',
+            image: imageUrl,
+          };
+        })
+      );
 
-    const handleSearchSubmit = () => {
-        if (searchTerm.trim()) {
-            setSelectedCategory(searchTerm.trim());
-        }
-    };
+      setRecommendedActivities(placesWithImages);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const handleActivityPress = (activity: { name: string; rating: number; location: string; image: any }) => {
-        setSelectedActivity(activity);
-        setModalVisible(true);
-    };
+  useEffect(() => {
+    fetchActivityRecommendations(selectedCategory);
+  }, [selectedCategory]);
 
-    const renderActivity = ({ item }: { item: { name: string; rating: number; location: string; image: any } }) => (
-        <TouchableOpacity onPress={() => handleActivityPress(item)}>
-            <View style={styles.activityContainer}>
-                <Text style={styles.activityText}>{item.name}</Text>
-            </View>
-        </TouchableOpacity>
-    );
+  return (
+    <View className="mt-10">
+      <Text className="text-3xl mt-16 ml-8 font-semibold">Explore</Text>
 
-    return (
-        <View style={{ flex: 1, marginTop: 40 }}>
-            <Text style={{ fontSize: 26, marginTop: 60, marginLeft: 20 }}>Explore</Text>
-            <TextInput
-                style={styles.searchBar}
-                placeholder="Search for activities..."
-                value={searchTerm}
-                onChangeText={handleSearchChange}
-                onSubmitEditing={handleSearchSubmit}
-            />
+      <TextInput
+        className="h-10 border border-gray-300 rounded-full px-4 mx-5 mt-10 text-base text-white"
+        placeholder="Search for activities..."
+        value={searchTerm}
+        onChangeText={setSearchTerm}
+        onSubmitEditing={() => {
+          if (searchTerm.trim()) setSelectedCategory(searchTerm.trim());
+        }}
+        placeholderTextColor="#ccc"
+      />
 
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
-                {['fun activities', 'restaurants', 'outdoors', 'music', 'events'].map((category) => (
-                    <TouchableOpacity
-                        key={category}
-                        style={[
-                            styles.categoryButton,
-                            selectedCategory === category && styles.selectedCategoryButton,
-                        ]}
-                        onPress={() => handleCategoryChange(category)}
-                    >
-                        <Text style={styles.categoryButtonText}>{category}</Text>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-4 pl-5">
+        {['things to do', 'restaurants', 'outdoors', 'music', 'events'].map((category) => (
+          <TouchableOpacity
+            key={category}
+            className={`mr-4 px-5 py-2 rounded-full h-10 ${
+              selectedCategory === category ? 'bg-[#7DFFA6]' : 'bg-gray-200'
+            }`}
+            onPress={() => setSelectedCategory(category)}
+          >
+            <Text className="text-base text-gray-800">{category}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-            {isLoading ? (
-                <ActivityIndicator size="large" color={accentGreen} style={{ marginTop: 20 }} />
-            ) : (
-                <FlatList
-                    data={recommendedActivities}
-                    renderItem={renderActivity}
-                    keyExtractor={(item, index) => index.toString()}
-                    contentContainerStyle={styles.activityList}
-                />
+      <View className="mt-6">
+        {isLoading ? (
+          <ActivityIndicator size="large" color={accentGreen} className="mt-5" />
+        ) : (
+          <FlatList
+            data={recommendedActivities}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedActivity(item);
+                  setModalVisible(true);
+                }}
+              >
+                <View className="p-2 mb-3 bg-gray-100 rounded-xl w-[350px] ml-5">
+                  <Text className="text-lg text-gray-800">{item.name}</Text>
+                </View>
+              </TouchableOpacity>
             )}
+            keyExtractor={(_, index) => index.toString()}
+            scrollEnabled={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        )}
+      </View>
 
-            {/* Modal for Activity Details */}
-            <Modal animationType="slide" transparent={true} visible={modalVisible}>
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPress={() => setModalVisible(false)}
-                >
-                    <View style={styles.modalContainer}>
-                        {selectedActivity?.image && (
-                            <Image source={{ uri: selectedActivity.image }} style={styles.modalImage} />
-                        )}
-                        <Text style={styles.modalTitle}>{selectedActivity?.name}</Text>
-                        <Text style={styles.modalText}>⭐ Rating: {selectedActivity?.rating}</Text>
-                        <Text style={styles.modalText}>📍 Location: {selectedActivity?.location}</Text>
-
-                        <TouchableOpacity style={styles.sendButton}>
-                            <Text style={styles.sendButtonText}>Send to Friend</Text>
-                        </TouchableOpacity>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
-        </View>
-    );
+      <Modal animationType="slide" transparent visible={modalVisible}>
+        <TouchableOpacity
+          className="flex-1 justify-center items-center bg-black/50"
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
+        >
+          <View className="w-[300px] p-5 bg-white rounded-xl items-center">
+            {selectedActivity?.image && (
+              <Image source={{ uri: selectedActivity.image }} className="w-[250px] h-[150px] rounded-lg mb-3" />
+            )}
+            <Text className="text-xl font-bold text-black mb-2">{selectedActivity?.name}</Text>
+            <Text className="text-base text-black mb-1">⭐ Rating: {selectedActivity?.rating}</Text>
+            <Text className="text-base text-black mb-3">📍 Location: {selectedActivity?.location}</Text>
+            <TouchableOpacity className="bg-[#7DFFA6] px-5 py-2 rounded-lg mt-2">
+              <Text className="text-black font-semibold">Send to Friend</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
+  );
 };
-
-const styles = StyleSheet.create({
-    searchBar: {
-        height: 40,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingHorizontal: 10,
-        marginVertical: 10,
-        marginHorizontal: 20,
-        fontSize: 16,
-        marginTop: 40,
-        fontFamily: 'Avenir',
-        color: 'white',
-    },
-    categoriesContainer: {
-        marginTop: 15,
-        paddingLeft: 20,
-        marginBottom: -160
-    },
-    categoryButton: {
-        marginRight: 15,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        backgroundColor: '#e0e0e0',
-        borderRadius: 20,
-        height: 40,
-    },
-    selectedCategoryButton: {
-        backgroundColor: accentGreen,
-    },
-    categoryButtonText: {
-        fontSize: 16,
-        color: '#333',
-    },
-    activityContainer: {
-        padding: 10,
-        marginBottom: 10,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 10,
-        width: 350,
-        marginLeft: 5,
-    },
-    activityText: {
-        fontSize: 18,
-        color: '#333',
-    },
-    activityList: {
-        marginTop: 30,
-        paddingLeft: 20,
-    },
-    modalOverlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalContainer: {
-        width: 300,
-        padding: 20,
-        backgroundColor: 'white',
-        borderRadius: 10,
-        alignItems: 'center',
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: "black"
-    },
-    modalText: {
-        fontSize: 16,
-        marginBottom: 5,
-        color: "black"
-    },
-    modalImage: {
-        width: 250,
-        height: 150,
-        borderRadius: 10,
-        marginBottom: 10,
-    },
-    sendButton: {
-        marginTop: 10,
-        backgroundColor: accentGreen,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 10,
-    },
-    sendButtonText: {
-        color: 'black',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-});
