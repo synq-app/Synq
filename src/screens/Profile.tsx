@@ -305,7 +305,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           <View className="flex flex-row flex-wrap mt-2 ml-2 bg-gray-900">
 
             {interests.map((interest, index) => (
-              <View key={index} className="bg-black py-2 px-3 rounded-full mr-3 mb-3 border border-green-400">
+              <View key={index} className="bg-gray-900 py-2 px-3 rounded-full mr-3 mb-3 border border-green-400">
                 <Text className="text-green-400 text-sm">{interest}</Text>
               </View>
             ))}
