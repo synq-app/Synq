@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Animated, Easing, StyleSheet } from "react-native";
+import { Text, Animated, Easing, View } from "react-native";
 
 interface StatusIndicatorProps {
   status: string;
@@ -32,36 +32,16 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status }) => {
   }, [status, pulseAnim]);
 
   return (
-    <View style={styles.statusContainer}>
-      <Text style={styles.statusText}>Status: {status}</Text>
+    <View className="flex flex-row items-center mt-4">
+      <Text className="text-[#7DFFA6] mr-2">Status: {status}</Text>
       {status === "Available" && (
         <Animated.View
-          style={[
-            styles.pulseCircle,
-            { transform: [{ scale: pulseAnim }] },
-          ]}
+          style={[{ transform: [{ scale: pulseAnim }] }]}
+          className="w-2.5 h-2.5 rounded-full bg-[#7DFFA6]"
         />
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  statusContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 16,
-  },
-  statusText: {
-    color: '#7DFFA6',
-    marginRight: 8,
-  },
-  pulseCircle: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#7DFFA6',
-  },
-});
 
 export default StatusIndicator;
