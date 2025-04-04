@@ -29,7 +29,9 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
           displayName: fullName, 
         });
       }
-      navigation.replace("Returning");
+      // navigation.replace("Returning");
+      navigation.navigate("GettingStarted");
+
 
     } catch (error) {
       console.error("Error updating display name:", error);

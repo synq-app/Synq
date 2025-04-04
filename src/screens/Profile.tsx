@@ -18,6 +18,60 @@ type AuthProps = {
   navigation: any;
 };
 
+const stateAbbreviations: { [key: string]: string } = {
+  "Alabama": "AL",
+  "Alaska": "AK",
+  "Arizona": "AZ",
+  "Arkansas": "AR",
+  "California": "CA",
+  "Colorado": "CO",
+  "Connecticut": "CT",
+  "Delaware": "DE",
+  "District of Columbia": "DC",
+  "Florida": "FL",
+  "Georgia": "GA",
+  "Hawaii": "HI",
+  "Idaho": "ID",
+  "Illinois": "IL",
+  "Indiana": "IN",
+  "Iowa": "IA",
+  "Kansas": "KS",
+  "Kentucky": "KY",
+  "Louisiana": "LA",
+  "Maine": "ME",
+  "Maryland": "MD",
+  "Massachusetts": "MA",
+  "Michigan": "MI",
+  "Minnesota": "MN",
+  "Mississippi": "MS",
+  "Missouri": "MO",
+  "Montana": "MT",
+  "Nebraska": "NE",
+  "Nevada": "NV",
+  "New Hampshire": "NH",
+  "New Jersey": "NJ",
+  "New Mexico": "NM",
+  "New York": "NY",
+  "North Carolina": "NC",
+  "North Dakota": "ND",
+  "Ohio": "OH",
+  "Oklahoma": "OK",
+  "Oregon": "OR",
+  "Pennsylvania": "PA",
+  "Rhode Island": "RI",
+  "South Carolina": "SC",
+  "South Dakota": "SD",
+  "Tennessee": "TN",
+  "Texas": "TX",
+  "Utah": "UT",
+  "Vermont": "VT",
+  "Virginia": "VA",
+  "Washington": "WA",
+  "West Virginia": "WV",
+  "Wisconsin": "WI",
+  "Wyoming": "WY"
+};
+
 export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [profileImage, setProfileImage] = useState<string | undefined>();
   const [isQRExpanded, setQRExpanded] = useState(false);
@@ -28,12 +82,40 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [loading, setLoading] = useState(true);
   const [newInterest, setNewInterest] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
+  const [city, setCity] = useState<string>('');
+  const [state, setState] = useState<string>('');
 
   const accountData = {
     id: auth.currentUser?.uid,
     email: auth.currentUser?.email,
     displayName: auth.currentUser?.displayName,
   };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', auth.currentUser?.uid || '');
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          const fullStateName = userData.state || 'Not available';
+          const stateAbbreviation = stateAbbreviations[fullStateName] || fullStateName;
+
+          setCity(userData.city || 'Not available');
+          setState(stateAbbreviation);
+        } else {
+          console.log('No such document!');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []); 
 
   const fetchTopConnections = async () => {
     try {
@@ -298,7 +380,8 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       {activeTab === "profile" && (
         <View className="bg-black">
           <Text className="text-lg mb-2 ml-4 mt-2 font-bold text-[#7DFFA6]">{auth.currentUser?.displayName}</Text>
-          <Text className="text-base mb-2 ml-4 mt-2">Location: Washington, DC</Text>
+          <Text className="text-base mb-2 ml-4 mt-2">Location: {city}, {state}
+          </Text>
           {/* <StatusIndicator status={'Available'} /> */}
           <Text className="text-lg mt-5 font-medium ml-2 text-white mb-2">My Interests</Text>
           <View className="flex flex-row flex-wrap mt-2 ml-2 bg-black">

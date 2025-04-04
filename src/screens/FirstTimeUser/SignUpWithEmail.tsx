@@ -31,7 +31,6 @@ export const SignUpWithEmail = ({ navigation }: AuthProps) => {
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View className="flex-1 justify-center">
-                {/* Close button */}
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Welcome")}
                     style={{ position: "absolute", top: 60, right: 20, zIndex: 3 }}

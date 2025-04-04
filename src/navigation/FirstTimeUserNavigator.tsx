@@ -11,6 +11,7 @@ import { Settings } from '../screens/Settings';
 import AddFriendsScreen from '../screens/AddFriends';
 import { NetworkScreen } from '../screens/Network';
 import { AvailableFriends } from '../screens/AvailableFriends';
+import { GettingStarted } from '../screens/GettingStarted';
 
 const FirstTimeUserStack = createNativeStackNavigator();
 export function FirstTimeUserNavigator() {
@@ -31,7 +32,7 @@ export function FirstTimeUserNavigator() {
       <FirstTimeUserStack.Screen name="Notifications" component={Notifications} options={{ headerShown: false }}/>   
       <FirstTimeUserStack.Screen name="Settings" component={Settings} options={{ headerShown: false }}/>   
       <FirstTimeUserStack.Screen name="AvailableFriends" component={AvailableFriends} options={{ headerShown: false }}/>   
-
+      <FirstTimeUserStack.Screen name="GettingStarted" component={GettingStarted} options={{ headerShown: false }}/>   
     </FirstTimeUserStack.Navigator>
   );
 }
