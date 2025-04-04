@@ -234,7 +234,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       <View className="w-48 h-48 flex justify-center items-center relative">
       <TouchableOpacity
             onPress={() => setQRExpanded(true)}
-            className="absolute opacity-50 border-2 border-green-500 rounded-md z-10 mt-24 w-48 h-48"
+            className="absolute opacity-50 border-2 border-green-500 rounded-md z-10 mt-24 w-48 h-42 justify-center items-center"
             >
             <QRCode
               value={JSON.stringify(accountData)}
@@ -312,7 +312,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           </View>
           <View className="flex flex-row items-center mt-5 mb-2 bg-gray-900">
             <TextInput
-              className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-2 text-lg ml-2"
+              className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-4 pb-2 text-base ml-2"
               placeholder="Add an interest"
               placeholderTextColor="#aaa"
               value={newInterest}

@@ -91,53 +91,28 @@ export const SignUpWithPhoneNumber = ({ navigation }: AuthProps) => {
                     <>
                         {!isCodeSent ? (
                             <>
-                                <Text style={{ color: "white", fontSize: 32, fontFamily: 'JosefinSans_400Regular', width: 300, marginLeft: 30, marginTop: 90 }}>
+                                <Text className="text-white text-3xl ml-6 w-80 mt-10">
                                     What's your phone number?
                                 </Text>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 40 }}>
-                                    <TextInput
+                                <View className="flex flex-row items-center mt-10">
+                                <TextInput
                                         value={countryCode}
                                         editable={true}
                                         onChangeText={setCountryCode}
-                                        style={{
-                                            color: "white",
-                                            backgroundColor: '#333',
-                                            paddingVertical: 10,
-                                            paddingHorizontal: 15,
-                                            borderRadius: 5,
-                                            marginLeft: 20,
-                                            width: 50,
-                                            fontSize: 18,
-                                            height: 50,
-                                            marginTop: 20
-
-                                        }}
-                                    />
+                                        className="text-white bg-gray-800 w-18 h-12 mt-5 ml-5 rounded-md px-4 py-0 text-lg text-center"
+                                        />
                                     <TextInput
                                         value={phoneNumber}
                                         onChangeText={handlePhoneNumberChange}
-                                        className="border-b-4 border-synq-accent-light"
-                                        style={{
-                                            color: "white",
-                                            marginLeft: 10,
-                                            width: 260,
-                                            paddingVertical: 10,
-                                            paddingHorizontal: 15,
-                                            backgroundColor: '#333',
-                                            borderRadius: 5,
-                                            fontSize: 18,
-                                            height: 50,
-                                            marginTop: 20
-
-                                        }}
+                                        className="border-b-4 bg-gray-800 border-synq-accent-light text-white w-2/3 h-12 mt-5 ml-2 rounded-md px-2 py-0 text-lg flex items-center justify-center"
                                         keyboardType="phone-pad"
                                     />
                                 </View>
-                                <Text className="text-white" style={{ fontSize: 12, width: 320, marginLeft: 20, marginTop: 20 }}>
+                                <Text className="text-white text-xs w-3/4 ml-6 mt-4">
                                     Synq will send you a text with a verification code. Message and data rates may apply.
                                 </Text>
 
-                                <TouchableOpacity onPress={sendVerificationCode} style={{ marginTop: 60 }}>
+                                <TouchableOpacity onPress={sendVerificationCode} className="mt-10">
                                     <Button text="Send Code" onPress={sendVerificationCode} style={{ backgroundColor: '#7DFFA6' }} />
                                 </TouchableOpacity>
                             </>
@@ -145,8 +120,6 @@ export const SignUpWithPhoneNumber = ({ navigation }: AuthProps) => {
                             <>
                                 <Text style={{ color: "white", fontSize: 32, alignSelf: 'center' }}>Enter code</Text>
                                 <Text style={{ color: "white", fontSize: 12, alignSelf: 'center', marginTop: 10, width: 190, alignItems: 'center', textAlign: 'center' }}>Your temporary code was sent to ({phoneNumber.slice(0,3)}) {phoneNumber.slice(3,6)}-{phoneNumber.slice(6,10)}</Text>
-
-
                                 <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 30 }}>
                                     {code.map((digit, index) => (
                                         <TextInput
@@ -157,6 +130,7 @@ export const SignUpWithPhoneNumber = ({ navigation }: AuthProps) => {
                                             onKeyPress={(e) => handleKeyPress(e, index)}
                                             keyboardType="number-pad"
                                             maxLength={1}
+                                            className="text-white"
                                             style={{
                                                 width: 50,
                                                 height: 60,
@@ -165,16 +139,15 @@ export const SignUpWithPhoneNumber = ({ navigation }: AuthProps) => {
                                                 borderRadius: 10,
                                                 textAlign: "center",
                                                 fontSize: 24,
-                                                color: "white",
                                                 marginTop: 20,
                                                 marginHorizontal: 5,
-                                                backgroundColor: "black",
                                             }}
                                         />
                                     ))}
                                 </View>
-                                <Text style={{ color: "white", fontSize: 12, alignSelf: 'center', marginTop: 10 }}>Didn't receieve a code? Try again.</Text>
-
+                                <Text 
+                                className="text-white mt-10 align-self-center text-sm"
+                                style={{ fontSize: 12}}>Didn't receieve a code? Try again.</Text>
                                 <TouchableOpacity onPress={verifyCode} className="bg-green-600 px-4 py-2 rounded mt-4" style={{ top: 30, width: 105, alignSelf: 'center', alignItems: 'center' }}>
                                     <Text className="text-white">Continue</Text>
                                 </TouchableOpacity>
