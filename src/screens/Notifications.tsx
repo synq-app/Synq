@@ -24,13 +24,13 @@ export const Notifications = ({ navigation }: any) => {
 
                 <View className="flex bg-gray-900 pr-8 pb-20 rounded-t-xl gap-8">
                     <Text className="text-gray-400 self-end">Clear All</Text>
-                    <View style={{ height: 450 }}>
+                    <View className = "bg-gray-900" style={{ height: 450 }}>
                         <FlatList
                             data={notificationsData}
                             keyExtractor={(item) => item.id}
                             showsVerticalScrollIndicator={false}
                             renderItem={({ item }) => (
-                                <View className="mb-8">
+                                <View className="mb-8 bg-gray-900">
                                     <Text className="text-white px-5 text-lg">
                                         <Text className="text-green-400">{item.name} </Text>
                                         {item.message}
