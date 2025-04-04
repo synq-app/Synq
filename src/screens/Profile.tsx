@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Text, View } from '../components/Themed';
 import { Image, TouchableOpacity, Modal, StyleSheet, Alert, ScrollView, ActivityIndicator, TextInput } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, getDocs, collection, onSnapshot } from "firebase/firestore";
 import * as ImagePicker from 'expo-image-picker';
@@ -85,37 +84,49 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [city, setCity] = useState<string>('');
   const [state, setState] = useState<string>('');
   const [memo, setMemo] = useState<string>('');
+  const [synqTime, setSynqTime] = React.useState<number | null>(null);
 
   const accountData = {
     id: auth.currentUser?.uid,
     email: auth.currentUser?.email,
     displayName: auth.currentUser?.displayName,
   };
-
+  
+  const formatTime = (timeInSeconds: number) => {
+    const hours = Math.floor(timeInSeconds / 3600);
+    const minutes = Math.floor((timeInSeconds % 3600) / 60);
+    const seconds = timeInSeconds % 60;
+  
+    // Return formatted time (e.g., "01:00:21")
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+  
   useEffect(() => {
-    const fetchUserData = () => {
-      if (auth.currentUser?.uid) {
-        const userDocRef = doc(db, 'users', auth.currentUser?.uid);
-        const unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
-            const fullStateName = userData.state || 'Not available';
-            const stateAbbreviation = stateAbbreviations[fullStateName] || fullStateName;
-  
-            setCity(userData.city || 'Not available');
-            setState(stateAbbreviation);
-            setMemo(userData.memo || ''); 
-          } else {
-            console.log('No such document!');
-          }
-        });
-  
-        return () => unsubscribe(); 
-      }
-    };
-    fetchUserData();
-  }, []); 
-  
+    // Check if user is authenticated
+    if (auth.currentUser?.uid) {
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+
+      // Set up real-time listener for changes to user document
+      const unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          const fullStateName = userData.state || 'Not available';
+          const stateAbbreviation = stateAbbreviations[fullStateName] || fullStateName;
+
+          // Update state with values from Firestore
+          setSynqTime(userData?.activeSynqTime || null); // Continuously updating synqTime
+          setCity(userData.city || 'Not available');
+          setState(stateAbbreviation);
+          setMemo(userData.memo || '');
+        } else {
+          console.log('No such document!');
+        }
+      });
+
+      // Cleanup listener when the component unmounts
+      return () => unsubscribe();
+    }
+  }, []); // Empty dependency array, so this effect only runs once on mount
   const fetchTopConnections = async () => {
     try {
       const connectionsSnapshot = await getDocs(collection(db, 'users'));
@@ -339,7 +350,8 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         <View>
           <Text>{memo || "No memo provided"}</Text>
         </View>
-        <Text className="text-green-400 mt-4">Active SYNQ: 00:00:00</Text>
+        <Text className="text-green-400 mt-4">  {synqTime !== null ? `Active Synq Time: ${formatTime(synqTime)}` : 'No active synq time recorded'}
+        </Text>
       </View>
 
       <Modal visible={isQRExpanded} transparent animationType="fade">
