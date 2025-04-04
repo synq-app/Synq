@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Text, TextInput, TouchableOpacity, Alert, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Button } from "../../components/Themed";
-import { auth } from './firebaseConfig'; 
+import { auth } from './firebaseConfig';
 
 const SignInWithEmail = ({ navigation }: any) => {
   const [email, setEmail] = useState("");
@@ -19,50 +19,30 @@ const SignInWithEmail = ({ navigation }: any) => {
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 30 }}>
+      <View className="flex-1 justify-center px-8">
         <TouchableOpacity
           onPress={() => navigation.navigate("Welcome")}
-          style={{ position: "absolute", top: 60, right: 20, zIndex: 3 }}
+          className="absolute top-16 right-5 z-10"
         >
-          <Text style={{ fontSize: 28, color: "white" }}>×</Text>
+          <Text className="text-white text-3xl">×</Text>
         </TouchableOpacity>
-
-        <Text style={{ color: "white", fontSize: 32, fontFamily: 'JosefinSans_400Regular', width: 300, marginTop: -20 }}>
+        <Text className="text-white text-3xl font-['JosefinSans_400Regular'] w-72 mt-[-20px]">
           Sign in with email
         </Text>
-
         <TextInput
           value={email}
           onChangeText={setEmail}
           placeholder="Enter email"
-          style={{
-            color: "white",
-            marginTop: 20,
-            width: '100%',
-            paddingVertical: 10,
-            paddingHorizontal: 15,
-            backgroundColor: '#333',
-            borderRadius: 5
-          }}
+          className="text-white mt-5 w-full py-2 px-4 bg-gray-800 rounded-md"
         />
-
         <TextInput
           value={password}
           onChangeText={setPassword}
           placeholder="Enter password"
           secureTextEntry
-          style={{
-            color: "white",
-            marginTop: 15,
-            width: '100%',
-            paddingVertical: 10,
-            paddingHorizontal: 15,
-            backgroundColor: '#333',
-            borderRadius: 5
-          }}
+          className="text-white mt-4 w-full py-2 px-4 bg-gray-800 rounded-md"
         />
-
-        <TouchableOpacity onPress={handleEmailLogin} style={{ marginTop: 20 }}>
+        <TouchableOpacity onPress={handleEmailLogin} className="mt-5">
           <Button text="Sign In" onPress={handleEmailLogin} style={{ backgroundColor: '#7DFFA6' }} />
         </TouchableOpacity>
       </View>

@@ -257,7 +257,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         </View>
         <Text className="text-2xl mt-5 font-medium">{auth.currentUser?.displayName?.split(" ")[0]}</Text>
         <Text className="text-base mb-2 ml-4 mt-2 text-gray-500">Looking to go for a walk outside!</Text>
-
         <Text className="text-green-400 mt-4">Active SYNQ: 00:00:00</Text>
       </View>
 
@@ -340,7 +339,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             <Text className="text-black text-center">Add friends</Text>
           </TouchableOpacity>
         </View>
-
       )}
 
       {activeTab === "badges" && (
