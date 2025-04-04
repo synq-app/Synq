@@ -221,8 +221,8 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const accentGreen = "#7DFFA6";
 
   return (
-    <ScrollView className="bg-gray-900" style={{ flex: 1 }}>
-      <View className="flex flex-row justify-between p-4 mt-16 mb-[-10px] bg-gray-900">
+    <ScrollView className="bg-black" style={{ flex: 1 }}>
+      <View className="flex flex-row justify-between p-4 mt-16 mb-[-10px] bg-black">
         <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
           <Icon name="notifications-outline" size={26} color="#7DFFA6" />
         </TouchableOpacity>
@@ -230,7 +230,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           <Icon name="settings-outline" size={26} color="#7DFFA6" />
         </TouchableOpacity>
       </View>
-      <View className="py-12 items-center bg-gray-900">
+      <View className="py-12 items-center bg-black">
       <View className="w-48 h-48 flex justify-center items-center relative">
       <TouchableOpacity
             onPress={() => setQRExpanded(true)}
@@ -280,7 +280,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         </TouchableOpacity>
       </Modal>
 
-      <View className="flex flex-row justify-around mb-5 bg-gray-900">
+      <View className="flex flex-row justify-around mb-5 bg-black">
       <TouchableOpacity onPress={() => setActiveTab("profile")}>
           <Text style={{ fontSize: 16, fontWeight: activeTab === "profile" ? "bold" : "normal", color: activeTab === "profile" ? "#7DFFA6" : "white" }}>Profile</Text>
         </TouchableOpacity>
@@ -296,20 +296,20 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       </View>
 
       {activeTab === "profile" && (
-        <View className="bg-gray-900">
+        <View className="bg-black">
           <Text className="text-lg mb-2 ml-4 mt-2 font-bold text-[#7DFFA6]">{auth.currentUser?.displayName}</Text>
           <Text className="text-base mb-2 ml-4 mt-2">Location: Washington, DC</Text>
           {/* <StatusIndicator status={'Available'} /> */}
           <Text className="text-lg mt-5 font-medium ml-2 text-white mb-2">My Interests</Text>
-          <View className="flex flex-row flex-wrap mt-2 ml-2 bg-gray-900">
+          <View className="flex flex-row flex-wrap mt-2 ml-2 bg-black">
 
             {interests.map((interest, index) => (
-              <View key={index} className="bg-gray-900 py-2 px-3 rounded-full mr-3 mb-3 border border-green-400">
+              <View key={index} className="bg-black py-2 px-3 rounded-full mr-3 mb-3 border border-green-400">
                 <Text className="text-green-400 text-sm">{interest}</Text>
               </View>
             ))}
           </View>
-          <View className="flex flex-row items-center mt-5 mb-2 bg-gray-900">
+          <View className="flex flex-row items-center mt-5 mb-2 bg-black">
             <TextInput
               className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-4 pb-2 text-base ml-2"
               placeholder="Add an interest"
@@ -325,7 +325,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       )}
 
       {activeTab === "friends" && (
-        <View className="bg-gray-900">
+        <View className="bg-black">
           <Text className="text-lg font-bold text-white mt-2 ml-4 mb-5">Top Friends</Text>
           {topFriends.map((friend) => (
             <View key={friend.id} className="mb-2 p-2 bg-white rounded-2xl ml-4 w-4/5">
@@ -342,7 +342,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       )}
 
       {activeTab === "badges" && (
-        <View className="bg-gray-900">
+        <View className="bg-black">
           <Text className="text-lg font-bold mb-2 mt-2 ml-2">Badges</Text>
           {badges.map((badge) => (
             <View key={badge.id} className="mb-2 p-2 bg-transparent rounded-md">
@@ -353,7 +353,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       )}
 
       {activeTab === "favorites" && (
-        <View className="bg-gray-900">
+        <View className="bg-black">
           <Text className="text-lg font-bold mb-2 ml-3 mt-2">Favorited Activities</Text>
           {favoritedActivities.map((activity) => (
             <View key={activity.id} className="mb-2 p-2 bg-transparent rounded-md ml-3 mt-2">
@@ -362,7 +362,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           ))}
         </View>
       )}
-      <TouchableOpacity onPress={signOut} className="bg-gray-900 w-32 h-8 rounded-lg self-center mt-10 mb-10 border border-white">
+      <TouchableOpacity onPress={signOut} className="bg-black w-32 h-8 rounded-lg self-center mt-10 mb-10 border border-white">
         <Text className="text-white text-center text-lg">Sign Out</Text>
       </TouchableOpacity>
     </ScrollView>
