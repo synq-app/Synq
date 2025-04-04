@@ -3,7 +3,7 @@ import { Button, Text, View } from '../components/Themed';
 import { Image, TouchableOpacity, Modal, StyleSheet, Alert, ScrollView, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
-import { getFirestore, doc, getDoc, setDoc, updateDoc, getDocs, collection } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, getDocs, collection, onSnapshot } from "firebase/firestore";
 import * as ImagePicker from 'expo-image-picker';
 import { storage } from './FirstTimeUser/firebaseConfig';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -84,6 +84,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [interests, setInterests] = useState<string[]>([]);
   const [city, setCity] = useState<string>('');
   const [state, setState] = useState<string>('');
+  const [memo, setMemo] = useState<string>('');
 
   const accountData = {
     id: auth.currentUser?.uid,
@@ -92,31 +93,29 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userDocRef = doc(db, 'users', auth.currentUser?.uid || '');
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          const fullStateName = userData.state || 'Not available';
-          const stateAbbreviation = stateAbbreviations[fullStateName] || fullStateName;
-
-          setCity(userData.city || 'Not available');
-          setState(stateAbbreviation);
-        } else {
-          console.log('No such document!');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setLoading(false);
+    const fetchUserData = () => {
+      if (auth.currentUser?.uid) {
+        const userDocRef = doc(db, 'users', auth.currentUser?.uid);
+        const unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            const fullStateName = userData.state || 'Not available';
+            const stateAbbreviation = stateAbbreviations[fullStateName] || fullStateName;
+  
+            setCity(userData.city || 'Not available');
+            setState(stateAbbreviation);
+            setMemo(userData.memo || ''); 
+          } else {
+            console.log('No such document!');
+          }
+        });
+  
+        return () => unsubscribe(); 
       }
     };
-
     fetchUserData();
   }, []); 
-
+  
   const fetchTopConnections = async () => {
     try {
       const connectionsSnapshot = await getDocs(collection(db, 'users'));
@@ -211,7 +210,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           } else {
             alert("User is not authenticated.");
           }
-          // alert("Image uploaded successfully!");
         }
       );
     } catch (error: any) {
@@ -313,11 +311,11 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         </TouchableOpacity>
       </View>
       <View className="py-12 items-center bg-black">
-      <View className="w-48 h-48 flex justify-center items-center relative">
-      <TouchableOpacity
+        <View className="w-48 h-48 flex justify-center items-center relative">
+          <TouchableOpacity
             onPress={() => setQRExpanded(true)}
             className="absolute opacity-50 border-2 border-green-500 rounded-md z-10 mt-24 w-48 h-42 justify-center items-center"
-            >
+          >
             <QRCode
               value={JSON.stringify(accountData)}
               size={195}
@@ -338,7 +336,9 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           </TouchableOpacity>
         </View>
         <Text className="text-2xl mt-5 font-medium">{auth.currentUser?.displayName?.split(" ")[0]}</Text>
-        <Text className="text-base mb-2 ml-4 mt-2 text-gray-500">Looking to go for a walk outside!</Text>
+        <View>
+          <Text>{memo || "No memo provided"}</Text>
+        </View>
         <Text className="text-green-400 mt-4">Active SYNQ: 00:00:00</Text>
       </View>
 
@@ -363,7 +363,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       </Modal>
 
       <View className="flex flex-row justify-around mb-5 bg-black">
-      <TouchableOpacity onPress={() => setActiveTab("profile")}>
+        <TouchableOpacity onPress={() => setActiveTab("profile")}>
           <Text style={{ fontSize: 16, fontWeight: activeTab === "profile" ? "bold" : "normal", color: activeTab === "profile" ? "#7DFFA6" : "white" }}>Profile</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setActiveTab("friends")}>
