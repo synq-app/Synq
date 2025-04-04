@@ -221,8 +221,8 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const accentGreen = "#7DFFA6";
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "black" }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 14, marginTop: 60, marginBottom: -10 }}>
+    <ScrollView className="bg-gray-900" style={{ flex: 1 }}>
+      <View className="flex flex-row justify-between p-4 mt-16 mb-[-10px] bg-gray-900">
         <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
           <Icon name="notifications-outline" size={26} color="#7DFFA6" />
         </TouchableOpacity>
@@ -230,12 +230,12 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           <Icon name="settings-outline" size={26} color="#7DFFA6" />
         </TouchableOpacity>
       </View>
-      <View className="py-12 items-center">
-        <View style={styles.qrContainer}>
-          <TouchableOpacity
+      <View className="py-12 items-center bg-gray-900">
+      <View className="w-48 h-48 flex justify-center items-center relative">
+      <TouchableOpacity
             onPress={() => setQRExpanded(true)}
-            style={styles.qrCode}
-          >
+            className="absolute opacity-50 border-2 border-green-500 rounded-md z-10 mt-24 w-48 h-48"
+            >
             <QRCode
               value={JSON.stringify(accountData)}
               size={195}
@@ -247,27 +247,27 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={pickImage}
-            style={styles.profileImageWrapper}
+            className="absolute z-20 w-40 h-40 justify-center items-center"
           >
             <Image
               source={{ uri: profileImage || 'https://example.com/default-profile.jpg' }}
-              style={styles.profileImage}
+              className="w-40 h-40 rounded-full border-2 border-white"
             />
           </TouchableOpacity>
         </View>
-        <Text style={{ fontSize: 22, marginTop: 20, fontWeight: '500' }}>{auth.currentUser?.displayName?.split(" ")[0]}</Text>
-        <Text style={{ fontSize: 16, marginBottom: 10, marginLeft: 14, marginTop: 10, color: 'grey' }}>Looking to go for a walk outside!</Text>
+        <Text className="text-2xl mt-5 font-medium">{auth.currentUser?.displayName?.split(" ")[0]}</Text>
+        <Text className="text-base mb-2 ml-4 mt-2 text-gray-500">Looking to go for a walk outside!</Text>
 
         <Text className="text-green-400 mt-4">Active SYNQ: 00:00:00</Text>
       </View>
 
       <Modal visible={isQRExpanded} transparent animationType="fade">
         <TouchableOpacity
-          style={styles.modalContainer}
+          className="flex-1 justify-center items-center"
           activeOpacity={1}
           onPress={() => setQRExpanded(false)}
         >
-          <View style={styles.expandedQR}>
+          <View className="bg-white p-6 rounded-lg">
             <QRCode
               value={JSON.stringify(accountData)}
               size={300}
@@ -281,8 +281,8 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         </TouchableOpacity>
       </Modal>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-around", marginBottom: 20 }}>
-        <TouchableOpacity onPress={() => setActiveTab("profile")}>
+      <View className="flex flex-row justify-around mb-5 bg-gray-900">
+      <TouchableOpacity onPress={() => setActiveTab("profile")}>
           <Text style={{ fontSize: 16, fontWeight: activeTab === "profile" ? "bold" : "normal", color: activeTab === "profile" ? "#7DFFA6" : "white" }}>Profile</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setActiveTab("friends")}>
@@ -297,173 +297,76 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       </View>
 
       {activeTab === "profile" && (
-        <View>
-          <Text style={{ fontSize: 18, marginBottom: 10, marginLeft: 14, marginTop: 10, fontWeight: "bold", color: accentGreen }}>{auth.currentUser?.displayName}</Text>
-          <Text style={{ fontSize: 16, marginBottom: 10, marginLeft: 14, marginTop: 10 }}>Location: Washington, DC</Text>
-
+        <View className="bg-gray-900">
+          <Text className="text-lg mb-2 ml-4 mt-2 font-bold text-[#7DFFA6]">{auth.currentUser?.displayName}</Text>
+          <Text className="text-base mb-2 ml-4 mt-2">Location: Washington, DC</Text>
           {/* <StatusIndicator status={'Available'} /> */}
-          <Text style={{ fontSize: 18, marginTop: 20, fontWeight: '500', marginLeft: 10, color: 'white', marginBottom: 10 }}>My Interests</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, marginLeft: 10 }}>
+          <Text className="text-lg mt-5 font-medium ml-2 text-white mb-2">My Interests</Text>
+          <View className="flex flex-row flex-wrap mt-2 ml-2 bg-gray-900">
+
             {interests.map((interest, index) => (
-              <View key={index} style={styles.interestTag}>
-                <Text style={styles.interestText}>{interest}</Text>
+              <View key={index} className="bg-black py-2 px-3 rounded-full mr-3 mb-3 border border-green-400">
+                <Text className="text-green-400 text-sm">{interest}</Text>
               </View>
             ))}
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, marginTop: 20 }}>
+          <View className="flex flex-row items-center mt-5 mb-2 bg-gray-900">
             <TextInput
-              style={styles.input}
+              className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-2 text-lg ml-2"
               placeholder="Add an interest"
               placeholderTextColor="#aaa"
               value={newInterest}
               onChangeText={setNewInterest}
             />
-            <TouchableOpacity onPress={addInterest} style={styles.addButton}>
-              <Text style={styles.addButtonText}>Add</Text>
+            <TouchableOpacity onPress={addInterest} className="bg-[#7DFFA6] px-5 py-1 rounded-full ml-2">
+              <Text className="text-black text-lg font-bold">Add</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
 
       {activeTab === "friends" && (
-        <View>
-          <Text style={{ fontSize: 18, fontWeight: "bold", color: 'white', marginTop: 10, marginLeft: 14, marginBottom: 20 }}>Top Friends</Text>
+        <View className="bg-gray-900">
+          <Text className="text-lg font-bold text-white mt-2 ml-4 mb-5">Top Friends</Text>
           {topFriends.map((friend) => (
-            <View key={friend.id} style={{ marginBottom: 10, padding: 10, backgroundColor: "#f5f5f5", borderRadius: 20, marginLeft: 14, width: '80%' }}>
-              <Text style={{ color: 'black' }}>{friend.name} - Connections: {friend.streak}</Text>
+            <View key={friend.id} className="mb-2 p-2 bg-white rounded-2xl ml-4 w-4/5">
+              <Text className="text-black">{friend.name} - Connections: {friend.streak}</Text>
             </View>
           ))}
-          <TouchableOpacity onPress={() => navigation.navigate('Add Friends')} style={{ backgroundColor: accentGreen, width: 100, height: 30, borderRadius: 10, alignSelf: 'center', alignContent: 'center', justifyContent: 'center', marginTop: 20 }}>
-            <Text style={{ alignContent: 'center', alignSelf: 'center', justifyContent: 'center', color: 'black' }}>Add friends</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Add Friends')}
+            className="bg-[#7DFFA6] w-24 h-8 rounded-lg self-center justify-center mt-5"
+          >
+            <Text className="text-black text-center">Add friends</Text>
           </TouchableOpacity>
         </View>
+
       )}
 
       {activeTab === "badges" && (
-        <View>
-          <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10, marginTop: 10, marginLeft: 10 }}>Badges</Text>
+        <View className="bg-gray-900">
+          <Text className="text-lg font-bold mb-2 mt-2 ml-2">Badges</Text>
           {badges.map((badge) => (
-            <View key={badge.id} style={{ marginBottom: 10, padding: 10, backgroundColor: "black", borderRadius: 5 }}>
-              <Text>{badge.name}</Text>
+            <View key={badge.id} className="mb-2 p-2 bg-transparent rounded-md">
+              <Text className="text-white">{badge.name}</Text>
             </View>
           ))}
         </View>
       )}
 
       {activeTab === "favorites" && (
-        <View>
-          <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10, marginLeft: 14, marginTop: 10 }}>Favorited Activities</Text>
+        <View className="bg-gray-900">
+          <Text className="text-lg font-bold mb-2 ml-3 mt-2">Favorited Activities</Text>
           {favoritedActivities.map((activity) => (
-            <View key={activity.id} style={{ marginBottom: 10, padding: 10, backgroundColor: "black", borderRadius: 5, marginLeft: 14, marginTop: 10 }}>
-              <Text>{activity.name}</Text>
+            <View key={activity.id} className="mb-2 p-2 bg-transparent rounded-md ml-3 mt-2">
+              <Text className="text-white">{activity.name}</Text>
             </View>
           ))}
         </View>
       )}
-      <TouchableOpacity onPress={signOut} style={styles.signOutButton}>
-        <Text style={styles.signOutButtonText}>Sign Out</Text>
+      <TouchableOpacity onPress={signOut} className="bg-gray-900 w-32 h-8 rounded-lg self-center mt-10 mb-10 border border-white">
+        <Text className="text-white text-center text-lg">Sign Out</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  input: {
-    height: 40,
-    width: '65%',
-    backgroundColor: '#333',
-    color: 'white',
-    borderRadius: 20,
-    paddingLeft: 10,
-    fontSize: 16,
-    marginLeft: 10
-  },
-  addButton: {
-    backgroundColor: "#7DFFA6",
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginLeft: 10,
-  },
-  addButtonText: {
-    color: 'black',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  interestTag: {
-    backgroundColor: 'black',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginRight: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#7DFFA6'
-  },
-  interestText: {
-    color: '#7DFFA6',
-    fontSize: 16,
-  },
-  qrContainer: {
-    width: 200,
-    height: 200,
-    justifyContent: 'center',
-    alignContent: 'center',
-    alignItems: 'center',
-    position: 'relative'
-  },
-  qrCode: {
-    position: 'absolute',
-    opacity: 0.5,
-    borderWidth: 2,
-    borderColor: 'green',
-    borderRadius: 4,
-    zIndex: 1,
-    marginTop: 90,
-    height: 200,
-    width: 200
-  },
-  profileImageWrapper: {
-    position: 'absolute',
-    zIndex: 2,
-    width: 160,
-    height: 160,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignContent: 'center'
-  },
-  profileImage: {
-    width: 160,
-    height: 160,
-    borderRadius: 75,
-    borderWidth: 2,
-    borderColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignContent: 'center'
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-  },
-  expandedQR: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-  },
-  signOutButton: {
-    padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    borderRadius: 5,
-    marginTop: 80,
-    alignSelf: 'center',
-    borderWidth: 1,
-    borderColor: 'white'
-  },
-  signOutButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-});
