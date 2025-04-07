@@ -12,6 +12,9 @@ import AddFriendsScreen from '../screens/AddFriends';
 import { NetworkScreen } from '../screens/Network';
 import { AvailableFriends } from '../screens/AvailableFriends';
 import { GettingStarted } from '../screens/GettingStarted';
+import ScreenOne from '../screens/FirstTimeUser/ScreenOne';
+import ScreenTwo from '../screens/FirstTimeUser/ScreenTwo';
+import ScreenThree from '../screens/FirstTimeUser/ScreenThree';
 
 const FirstTimeUserStack = createNativeStackNavigator();
 export function FirstTimeUserNavigator() {
@@ -20,6 +23,9 @@ export function FirstTimeUserNavigator() {
       screenOptions={{
         headerShown: false,
       }}>
+      <FirstTimeUserStack.Screen name="ScreenOne" component={ScreenOne} options={{ headerShown: false }}/> 
+      <FirstTimeUserStack.Screen name="ScreenTwo" component={ScreenTwo} options={{ headerShown: false }}/>   
+      <FirstTimeUserStack.Screen name="ScreenThree" component={ScreenThree} options={{ headerShown: false }}/>   
       <FirstTimeUserStack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
       <FirstTimeUserStack.Screen name="SignInWithEmail" component={SignInWithEmail} options={{ headerShown: false }} />
       <FirstTimeUserStack.Screen name="SignInWithPhoneNumber" component={SignInWithPhoneNumber} options={{ headerShown: false }}/>

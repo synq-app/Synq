@@ -13,7 +13,7 @@ const SignInWithPhoneNumber = ({ navigation }: any) => {
   const [countryCode, setCountryCode] = useState("+1");
   const recaptchaVerifier = useRef(null);
   const inputs = useRef<(TextInput | null)[]>([]);
-  
+
 
   const handlePhoneNumberChange = (text: string) => {
     const formattedText = text.replace(/\D/g, "").slice(0, 10);  // Limiting input to 10 digits
@@ -26,9 +26,9 @@ const SignInWithPhoneNumber = ({ navigation }: any) => {
     setCode(newCode);
 
     if (text && index < 5) {
-        inputs.current[index + 1]?.focus();
+      inputs.current[index + 1]?.focus();
     }
-};
+  };
 
   const sendVerificationCode = async () => {
     if (!recaptchaVerifier.current) {
@@ -59,9 +59,9 @@ const SignInWithPhoneNumber = ({ navigation }: any) => {
 
   const handleKeyPress = (e: any, index: any) => {
     if (e.nativeEvent.key === "Backspace" && index > 0 && !code[index]) {
-        inputs.current[index - 1]?.focus();
+      inputs.current[index - 1]?.focus();
     }
-};
+  };
 
 
   return (
@@ -134,43 +134,43 @@ const SignInWithPhoneNumber = ({ navigation }: any) => {
             </TouchableOpacity>
           </>
         ) : (
-                  <>
-                                 <Text style={{ color: "white", fontSize: 32, alignSelf: 'center' }}>Enter code</Text>
-                                 <Text style={{ color: "white", fontSize: 12, alignSelf: 'center', marginTop: 10, width: 190, alignItems: 'center', textAlign: 'center' }}>Your temporary code was sent to ({phoneNumber.slice(0,3)}) {phoneNumber.slice(3,6)}-{phoneNumber.slice(6,10)}</Text>
- 
- 
-                                 <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 30 }}>
-                                     {code.map((digit, index) => (
-                                         <TextInput
-                                             key={index}
-                                             ref={(el) => (inputs.current[index] = el)}
-                                             value={digit}
-                                             onChangeText={(text) => handleChange(text, index)}
-                                             onKeyPress={(e) => handleKeyPress(e, index)}
-                                             keyboardType="number-pad"
-                                             maxLength={1}
-                                             style={{
-                                                 width: 50,
-                                                 height: 60,
-                                                 borderWidth: 2,
-                                                 borderColor: '#7DFFA6',
-                                                 borderRadius: 10,
-                                                 textAlign: "center",
-                                                 fontSize: 24,
-                                                 color: "white",
-                                                 marginTop: 20,
-                                                 marginHorizontal: 5,
-                                                 backgroundColor: "black",
-                                             }}
-                                         />
-                                     ))}
-                                 </View>
-                                 <Text style={{ color: "white", fontSize: 12, alignSelf: 'center', marginTop: 10 }}>Didn't receieve a code? Try again.</Text>
- 
-                                 <TouchableOpacity onPress={verifyCode} className="bg-green-600 px-4 py-2 rounded mt-4" style={{ top: 30, width: 105, alignSelf: 'center', alignItems: 'center' }}>
-                                     <Text className="text-white">Continue</Text>
-                                 </TouchableOpacity>
-                             </>
+          <>
+            <Text style={{ color: "white", fontSize: 32, alignSelf: 'center' }}>Enter code</Text>
+            <Text style={{ color: "white", fontSize: 12, alignSelf: 'center', marginTop: 10, width: 190, alignItems: 'center', textAlign: 'center' }}>Your temporary code was sent to ({phoneNumber.slice(0, 3)}) {phoneNumber.slice(3, 6)}-{phoneNumber.slice(6, 10)}</Text>
+
+
+            <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 30 }}>
+              {code.map((digit, index) => (
+                <TextInput
+                  key={index}
+                  ref={(el) => (inputs.current[index] = el)}
+                  value={digit}
+                  onChangeText={(text) => handleChange(text, index)}
+                  onKeyPress={(e) => handleKeyPress(e, index)}
+                  keyboardType="number-pad"
+                  maxLength={1}
+                  style={{
+                    width: 50,
+                    height: 60,
+                    borderWidth: 2,
+                    borderColor: '#7DFFA6',
+                    borderRadius: 10,
+                    textAlign: "center",
+                    fontSize: 24,
+                    color: "white",
+                    marginTop: 20,
+                    marginHorizontal: 5,
+                    backgroundColor: "black",
+                  }}
+                />
+              ))}
+            </View>
+            <Text style={{ color: "white", fontSize: 12, alignSelf: 'center', marginTop: 10 }}>Didn't receieve a code? Try again.</Text>
+
+            <TouchableOpacity onPress={verifyCode} className="bg-green-600 px-4 py-2 rounded mt-4" style={{ top: 30, width: 105, alignSelf: 'center', alignItems: 'center' }}>
+              <Text className="text-white">Continue</Text>
+            </TouchableOpacity>
+          </>
         )}
       </View>
     </TouchableWithoutFeedback>

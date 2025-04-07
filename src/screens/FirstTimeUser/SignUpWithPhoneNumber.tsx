@@ -73,7 +73,6 @@ export const SignUpWithPhoneNumber = ({ navigation }: AuthProps) => {
 
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-
             <View className="flex-1 justify-center">
                 <FirebaseRecaptchaVerifierModal
                     ref={recaptchaVerifier}
