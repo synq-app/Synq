@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, Text } from '../../components/Themed';
 import { TouchableOpacity } from 'react-native';
-import { SvgXml } from 'react-native-svg'; 
+import { SvgXml } from 'react-native-svg';
 
 const synqSvg = `
   <svg width="390" height="565" viewBox="0 0 390 565" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -19,7 +19,7 @@ export default function ScreenTwo({ navigation }: any) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowText(true);
-    }, 5000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -28,37 +28,41 @@ export default function ScreenTwo({ navigation }: any) {
     setShowText(true);
   };
 
+
   return (
     <View className="flex-1 justify-center items-center bg-black relative" onTouchEnd={handlePress}>
       <SvgXml
         xml={synqSvg}
-        width="390"  
-        height="565" 
+        width="390"
+        height="565"
         className="absolute top-0"
       />
 
-      <Text className="text-white text-center px-5 w-5/6 text-base mb-8 mt-20">
+      <Text className="text-white text-center px-5 w-5/6 text-base absolute top-60" style={{ fontFamily: 'avenir'}}>
         Welcome to SYNQ, a social tool that connects you with available friends for spontaneous time together.
       </Text>
 
       {showText && (
-        <Text className="text-white text-center px-5 w-5/6 text-base mb-8 mt-10">
+        <Text className="text-white text-center px-5 w-5/6 text-base absolute top-100" style={{ fontFamily: 'avenir'}}>
           When you're free, tap the button to activate, see which friends are available, and make it happen!
         </Text>
       )}
 
       <TouchableOpacity
         onPress={() => navigation.navigate('ScreenThree')}
-        className="bg-[#6DFE95] py-3 px-8 rounded-md mt-20"
+        className="bg-[#6DFE95] py-3 px-16 rounded-md mt-80 top-20"
       >
-        <Text className="text-black text-center text-lg">Continue</Text>
+        <Text className="text-black text-center text-lg" style={{ fontFamily: 'avenir'}}>Continue</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         onPress={() => navigation.navigate('Welcome')}
         className="py-3 px-8 mt-20"
       >
-        <Text className="text-white text-center text-sm">Already have an account? Click here.</Text>
+        <Text className="text-white text-center text-sm">
+          Already have an account?
+          <Text className="text-[#6DFE95]"> Click here</Text>.
+        </Text>
       </TouchableOpacity>
     </View>
   );

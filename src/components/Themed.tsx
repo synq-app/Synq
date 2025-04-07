@@ -15,7 +15,7 @@ export function Text(props: TextProps) {
   const { style, ...otherProps } = props;
   const textColor = useThemeColor('text');
 
-  return <DefaultText style={[{ color: textColor }, { fontFamily: 'JosefinSans_400Regular' }, style]} {...otherProps} />;
+  return <DefaultText style={[{ color: textColor }, { fontFamily: 'Avenir' }, style]} {...otherProps} />;
 }
 
 export function View(props: ViewProps) {
