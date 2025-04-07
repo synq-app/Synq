@@ -8,6 +8,7 @@ import { ReturningUserStackNavigator } from './ReturningUserStackNavigator';
 export interface NavigationProps {
   colorScheme: ColorSchemeName;
   isFirstTimeUser: boolean;
+  isUserLoggedIn: boolean;
 }
 
 const Stack = createNativeStackNavigator();

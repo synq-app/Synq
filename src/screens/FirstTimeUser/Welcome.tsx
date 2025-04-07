@@ -10,11 +10,6 @@ export default function WelcomeScreen({ navigation }: any) {
 
   return (
     <View className="flex-1 justify-between px-4 py-8">
-       {/* <Image
-          source={require('./Roll of the Die.gif')}
-          style={{ width: 200, height: 200, marginTop: 50 }}
-          resizeMode="contain"
-        /> */}
       <View className="flex-1 justify-center items-center">
         <Text className="text-6xl mb-8 mt-16">SYNQ</Text>
         <Text className="text-center text-lg">

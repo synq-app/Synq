@@ -21,10 +21,10 @@ export const AvailableFriends = ({ navigation }: AuthProps) => {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: 'bg-gray-900' }}>
+        <SafeAreaView className="flex-1 bg-gray-900">
             <View className="flex-row justify-between items-center px-6 pb-4 mt-8">
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Text className='text-white text-2xl'>
+                    <Text className="text-white text-2xl">
                         {"<"}
                     </Text>
                 </TouchableOpacity>
@@ -53,21 +53,20 @@ export const AvailableFriends = ({ navigation }: AuthProps) => {
                 }}
                 contentContainerStyle={{ paddingBottom: 80 }}
             />
-
             <TouchableOpacity
                 disabled={selectedFriends.length === 0}
-                style={{
-                    backgroundColor: selectedFriends.length > 0 ? '#7DFFA6' : 'gray',
-                    paddingVertical: 15,
-                    borderRadius: 8,
-                    marginHorizontal: 20,
-                    marginBottom: 60,
-                    width: 200,
-                    alignContent: 'center',
-                    alignSelf: 'center'
+                onPress={() => {
+                    if (selectedFriends.length > 0) {
+                        navigation.navigate('Default');
+                    }
                 }}
+                className={`${
+                    selectedFriends.length > 0 ? 'bg-green-400' : 'bg-gray-500'
+                } py-4 px-8 rounded-lg mx-6 mb-16 w-48 self-center`}
             >
-                <Text style={{ textAlign: 'center', color:  selectedFriends.length > 0 ? 'black' : 'white', fontSize: 18 }}>Connect</Text>
+                <Text className={`text-center ${selectedFriends.length > 0 ? 'text-black' : 'text-white'} text-lg`}>
+                    Connect
+                </Text>
             </TouchableOpacity>
         </SafeAreaView>
     );
