@@ -10,31 +10,36 @@ export default function App() {
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
 
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean | null>(null);  
-  const isFirstTimeUser = false;
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState<boolean>(false);
 
   useEffect(() => {
     const auth = getAuth();  
-    console.log('auth: ', auth)
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('user: ', user)
       if (user) {
-        setIsUserLoggedIn(true);  
+        setIsFirstTimeUser(false) 
       } else {
-        setIsUserLoggedIn(false); 
+        setIsFirstTimeUser(true);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
-  if (!isLoadingComplete || isUserLoggedIn === null) {
+  if (!isLoadingComplete) {
     return null;
-  } else {
+  }
+  else if(!isFirstTimeUser) {
+    console.log('user is not logged in and is a first time user')
+    return (  
+      <SafeAreaProvider>
+      <Navigation colorScheme={colorScheme} isFirstTimeUser={isFirstTimeUser} />
+      <StatusBar />
+    </SafeAreaProvider>
+    )
+  }
+   else {
     return (
       <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} isFirstTimeUser={isFirstTimeUser} isUserLoggedIn={isUserLoggedIn} />
+        <Navigation colorScheme={colorScheme} isFirstTimeUser={isFirstTimeUser} />
         <StatusBar />
       </SafeAreaProvider>
     );

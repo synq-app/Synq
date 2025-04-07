@@ -53,6 +53,13 @@ export default function ScreenTwo({ navigation }: any) {
       >
         <Text className="text-black text-center text-lg">Continue</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Welcome')}
+        className="py-3 px-8 mt-20"
+      >
+        <Text className="text-white text-center text-sm">Already have an account? Click here.</Text>
+      </TouchableOpacity>
     </View>
   );
 }
