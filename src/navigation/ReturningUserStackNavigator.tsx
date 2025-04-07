@@ -26,6 +26,7 @@ import AddFriendsScreen from '../screens/AddFriends';
 import { ProfileNavigator } from './ProfileNavigator';
 import { AvailableFriends } from '../screens/AvailableFriends';
 import { GettingStarted } from '../screens/GettingStarted';
+import { SynqActivated } from '../screens/SynqActivated';
 
 const ReturningUserStack = createNativeStackNavigator();
 export function ReturningUserStackNavigator() {
@@ -46,6 +47,7 @@ export function ReturningUserStackNavigator() {
       <ReturningUserStack.Screen name="Network" component={NetworkScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="AvailableFriends" component={AvailableFriends} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="GettingStarted" component={GettingStarted} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="SynqActivated" component={SynqActivated} options={{ headerShown: false }} />
 
       <ReturningUserStack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <ReturningUserStack.Group screenOptions={{ presentation: 'modal' }}>

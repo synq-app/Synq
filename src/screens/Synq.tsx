@@ -117,12 +117,13 @@ export const SynqScreen = ({ navigation }: AuthProps) => {
         <TouchableOpacity
           onPress={() => {
             handleSaveMemo();
-            navigation.navigate('AvailableFriends');
-            if (isTimerRunning) {
-              stopTimer();
-            } else {
-              startTimer(); 
-            }
+            navigation.navigate('SynqActivated');
+            // navigation.navigate('AvailableFriends');
+            // if (isTimerRunning) {
+            //   stopTimer();
+            // } else {
+            //   startTimer(); 
+            // }
           }}
         >
           <Image
