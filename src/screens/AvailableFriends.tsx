@@ -21,7 +21,7 @@ export const AvailableFriends = ({ navigation }: AuthProps) => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900">
+        <SafeAreaView className="flex-1 bg-gray-1000">
             <View className="flex-row justify-between items-center px-6 pb-4 mt-8">
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text className="text-white text-2xl">
