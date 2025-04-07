@@ -348,9 +348,9 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         </View>
         <Text className="text-2xl mt-5 font-medium">{auth.currentUser?.displayName?.split(" ")[0]}</Text>
         <View>
-          <Text>{memo || "No memo provided"}</Text>
+          <Text>{memo || ""}</Text>
         </View>
-        <Text className="text-green-400 mt-4">  {synqTime !== null ? `Active Synq Time: ${formatTime(synqTime)}` : 'No active synq time recorded'}
+        <Text className="text-green-400 mt-4">  {synqTime !== null ? `Active Synq Time: ${formatTime(synqTime)}` : '00:00:00'}
         </Text>
       </View>
 
