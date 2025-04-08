@@ -30,7 +30,9 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
         });
       }
       // navigation.replace("Returning");
-      navigation.navigate("GettingStarted");
+      //navigation.navigate("GettingStarted");
+      navigation.navigate("StepThree");
+
 
 
     } catch (error) {
@@ -75,7 +77,7 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
             borderRadius: 5
           }} />
       </View>
-      <Button text="Get Started" onPress={handleGetStarted} />
+      <Button text="Get Started" className="bg-[#7DFFA6]" onPress={handleGetStarted} />
     </View>
   );
 }

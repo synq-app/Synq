@@ -61,13 +61,16 @@ export default function ScreenThree({ navigation }: any) {
 
     const verifyCode = async () => {
         try {
-            const userCredential = await confirm.confirm(code);
+            const codeString = code.join('');
+            console.log('code :', codeString); 
+            const userCredential = await confirm.confirm(codeString);
             const user = userCredential.user;
             navigation.navigate("StepTwo", { user: userCredential.user });
         } catch (error) {
             Alert.alert("Error", "Incorrect verification code. Please try again.");
         }
     };
+    
 
     return (
         <View className="flex-1 justify-center items-center bg-black relative">
@@ -82,7 +85,9 @@ export default function ScreenThree({ navigation }: any) {
                     <FirebaseRecaptchaVerifierModal
                         ref={recaptchaVerifier}
                         firebaseConfig={app.options}
-                        attemptInvisibleVerification={true}
+                        // attemptInvisibleVerification={true}
+                        attemptInvisibleVerification={false}
+
                     />
                     <View className="mb-20">
                         {!isCodeSent ? (
@@ -142,7 +147,7 @@ export default function ScreenThree({ navigation }: any) {
                                     Didn't receive a code? Try again.
                                 </Text>
                                 <TouchableOpacity onPress={verifyCode} className="bg-[#6DFE95] px-8 py-2 rounded-md mt-6 mx-auto">
-                                    <Text className="text-white text-lg">Continue</Text>
+                                    <Text className="text-black text-lg">Continue</Text>
                                 </TouchableOpacity>
                             </>
                         )}

@@ -112,7 +112,7 @@ export const GettingStarted = ({ navigation }: AuthProps) => {
                 onPress={handleSaveCity}
                 disabled={loading}
             >
-                <Text className="text-lg text-black font-bold">{'Next'}</Text>
+                <Text className="text-lg text-black w-40">{'Next'}</Text>
             </TouchableOpacity>
         </View>
     );
