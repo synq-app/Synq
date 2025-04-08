@@ -9,6 +9,9 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 import StatusIndicator from './Status';
 import Icon from 'react-native-vector-icons/Ionicons';
+// Ensure the file exists at the correct path or update the path accordingly
+
+const defaultPic = require('../assets/images/default-profile-pic.jpg'); // Update the path if it's different
 
 const db = getFirestore();
 const auth = getAuth();
@@ -91,16 +94,16 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     email: auth.currentUser?.email,
     displayName: auth.currentUser?.displayName,
   };
-  
+
   const formatTime = (timeInSeconds: number) => {
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
     const seconds = timeInSeconds % 60;
-  
+
     // Return formatted time (e.g., "01:00:21")
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
-  
+
   useEffect(() => {
     // Check if user is authenticated
     if (auth.currentUser?.uid) {
@@ -341,7 +344,8 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             className="absolute z-20 w-40 h-40 justify-center items-center"
           >
             <Image
-              source={{ uri: profileImage || 'https://example.com/default-profile.jpg' }}
+              source={profileImage ? { uri: profileImage } : defaultPic}
+
               className="w-40 h-40 rounded-full border-2 border-white"
             />
           </TouchableOpacity>

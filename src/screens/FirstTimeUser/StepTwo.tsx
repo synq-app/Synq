@@ -32,9 +32,6 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
       // navigation.replace("Returning");
       //navigation.navigate("GettingStarted");
       navigation.navigate("StepThree");
-
-
-
     } catch (error) {
       console.error("Error updating display name:", error);
     }
@@ -43,7 +40,7 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
   return (
     <View className="flex-1 justify-center">
       <View className='mb-20'>
-        <Text style={{ color: "white", fontSize: 32, fontFamily: 'JosefinSans_400Regular', width: 300, marginLeft: 30, marginTop: 90 }}>
+        <Text style={{ color: "white", fontSize: 32, fontFamily: 'Avenir', width: 300, marginLeft: 30, marginTop: 90 }}>
           What's your name?
         </Text>
         <TextInput
