@@ -28,7 +28,6 @@ export default function App() {
     return null;
   }
   else if(!isFirstTimeUser) {
-    console.log('user is not logged in and is a first time user')
     return (  
       <SafeAreaProvider>
       <Navigation colorScheme={colorScheme} isFirstTimeUser={isFirstTimeUser} />
