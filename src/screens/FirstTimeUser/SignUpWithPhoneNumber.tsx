@@ -13,9 +13,6 @@ export const SignUpWithPhoneNumber = ({ navigation }: AuthProps) => {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [confirm, setConfirm] = useState<any>(null);
     const [isCodeSent, setIsCodeSent] = useState(false);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [isEmailAuth, setIsEmailAuth] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
     const [countryCode, setCountryCode] = useState("+1");

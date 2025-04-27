@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { View, Text, Button } from '../../components/Themed';
 import { TouchableOpacity, Alert, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { SvgXml } from 'react-native-svg'; 
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
-import { auth, signInWithPhoneNumber, createUserWithEmailAndPassword, app } from "./firebaseConfig";
+import { auth, signInWithPhoneNumber, app } from "./firebaseConfig";
+import axios from 'axios';
+import { ENV_VARS } from '../../../config';
 
 const synqSvg = `
   <svg width="390" height="565" viewBox="0 0 390 565" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -62,10 +64,9 @@ export default function ScreenThree({ navigation }: any) {
     const verifyCode = async () => {
         try {
             const codeString = code.join('');
-            console.log('code :', codeString); 
             const userCredential = await confirm.confirm(codeString);
             const user = userCredential.user;
-            navigation.navigate("StepTwo", { user: userCredential.user });
+            navigation.navigate("StepTwo", { user: userCredential.user});
         } catch (error) {
             Alert.alert("Error", "Incorrect verification code. Please try again.");
         }
