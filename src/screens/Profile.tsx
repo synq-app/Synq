@@ -114,7 +114,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const fetchTopConnections = async () => {
     try {
       const connectionsSnapshot = await getDocs(collection(db, 'users'));
-      console.log('connections snapshot: ', connectionsSnapshot)
       const fetchedConnections: { name: string; imageUrl: string }[] = [];
       connectionsSnapshot.forEach(doc => {
         const userData = doc.data();
@@ -354,16 +353,40 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       </Modal>
 
       <View className="bg-black">
-        <Text className="text-lg font-medium ml-4 text-white mb-2">Top Activities</Text>
+      <Text className="text-lg font-medium ml-4 text-white mb-2">Top Synqs</Text>
+
+<ScrollView
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  className="ml-4 mt-6"
+>
+  {topFriends.map((friend) => (
+    <View key={friend.id} className="items-center mr-4">
+      <Image
+        source={{ uri: friend.photo }}
+        className="w-16 h-16 rounded-full bg-white"
+      />
+      <Text className="text-white text-xs mt-2 text-center">{friend.name}</Text>
+    </View>
+  ))}
+
+  <TouchableOpacity onPress={() => navigation.navigate('Add Friends')} className="items-center mr-4">
+    <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
+      <Text className="text-green-400 text-3xl">+</Text>
+    </View>
+    <Text className="text-white text-xs mt-2 text-center">Add</Text>
+  </TouchableOpacity>
+</ScrollView>
+        <Text className="text-lg font-medium ml-4 text-white mt-6">Top Activities</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className="ml-4"
+          className="ml-4 mt-6"
         >
           {interests.map((interest) => (
             <View key={interest} className="items-center mr-6">
               <Image
-                source={{ uri: interest || 'https://yourcdn.com/default.jpg' }}
+                source={{ uri: `https://picsum.photos/160/160?random=1` }}
                 className="w-16 h-16 rounded-full bg-white"
               />
               <Text className="text-white text-xs mt-2 text-center">{interest}</Text>
@@ -371,30 +394,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           ))}
         </ScrollView>
 
-        <Text className="text-lg font-medium ml-4 text-white mb-2 mt-6">Top Synqs</Text>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="ml-4 mt-6"
-        >
-          {topFriends.map((friend) => (
-            <View key={friend.id} className="items-center mr-4">
-              <Image
-                source={{ uri: friend.photo }}
-                className="w-16 h-16 rounded-full bg-white"
-              />
-              <Text className="text-white text-xs mt-2 text-center">{friend.name}</Text>
-            </View>
-          ))}
-
-          <TouchableOpacity onPress={() => navigation.navigate('Add Friends')} className="items-center mr-4">
-            <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
-              <Text className="text-green-400 text-3xl">+</Text>
-            </View>
-            <Text className="text-white text-xs mt-2 text-center">Add</Text>
-          </TouchableOpacity>
-        </ScrollView>
         <View className="flex flex-row items-center mt-5 mb-2 bg-black">
           <TextInput
             className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-4 pb-2 text-base ml-2"
