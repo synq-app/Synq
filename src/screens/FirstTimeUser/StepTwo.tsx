@@ -36,12 +36,13 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
       const userData = {
         email: user.email !== undefined ? user.email : null,  
         phoneNumber: user.phoneNumber !== undefined ? user.phoneNumber : null,
+        // if only using email, phone number should be able to be null
+        //phoneNumber: "202-101-2225",
         id: localId, 
-        username: firstName + "_" + lastName,
+        username: firstName + lastName,
         firstName: firstName,
         lastName: lastName,
       };
-      console.log('User data: ', userData)
 
       const synqApiUrl = `https://synq.azurewebsites.net/api/users/${localId}`;
       
