@@ -1,15 +1,19 @@
 import { Text, View, Button } from '../../components/Themed';
-import { TextInput } from "react-native"
+import { TextInput } from "react-native";
 import * as React from "react";
 import { updateProfile } from 'firebase/auth'; 
 import { useRoute, RouteProp } from "@react-navigation/native";
+import axios from 'axios';
 
 interface StepTwoProps {
   navigation: any;
 }
+
 type StepTwoRouteParams = {
   StepTwo: {
-    user: any; 
+    user: any;
+    idToken: string; 
+    localId: string;  
   };
 };
 
@@ -18,10 +22,10 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
   const [lastName, setLastName] = React.useState<string>('');
   const route = useRoute<RouteProp<StepTwoRouteParams, 'StepTwo'>>(); 
 
-  const { user } = route.params || {}; 
+  const { user, idToken, localId } = route.params || {};  
 
   const handleGetStarted = async () => {
-    var fullName = firstName + " " + lastName
+    const fullName = firstName + " " + lastName;
 
     try {
       if (firstName.trim() !== "") {
@@ -29,50 +33,49 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
           displayName: fullName, 
         });
       }
-      // navigation.replace("Returning");
-      //navigation.navigate("GettingStarted");
+
+      const userData = {
+        email: user.email,  
+        // need phone number to be optional
+        phoneNumber: "301-299-4541",
+        id: localId, 
+        username: firstName + "_" + lastName,
+        firstName: firstName,
+        lastName: lastName,
+      };
+
+      const synqApiUrl = `https://synq.azurewebsites.net/api/users/${localId}`;
+      
+      await axios.put(synqApiUrl, userData, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
       navigation.navigate("StepThree");
     } catch (error) {
-      console.error("Error updating display name:", error);
+      console.error("Error updating profile or sending API request:", error);
     }
   };
 
   return (
     <View className="flex-1 justify-center">
-      <View className='mb-20'>
-        <Text style={{ color: "white", fontSize: 32, fontFamily: 'Avenir', width: 300, marginLeft: 30, marginTop: 90 }}>
+      <View className="mb-20">
+        <Text className="text-white text-2xl ml-7 mt-24">
           What's your name?
         </Text>
         <TextInput
           value={firstName}
           onChangeText={setFirstName}
           placeholder="First name"
-          className="border-b-4 border-synq-accent-light"
-          style={{
-            color: "white",
-            marginLeft: 30,
-            marginTop: 20,
-            width: 300,
-            paddingVertical: 10,
-            paddingHorizontal: 15,
-            backgroundColor: '#333',
-            borderRadius: 5
-          }} />
-           <TextInput
+          className="mt-5 ml-7 w-3/4 py-3 px-4 bg-gray-800 rounded border-b-4 border-synq-accent-light"
+        />
+        <TextInput
           value={lastName}
           onChangeText={setLastName}
           placeholder="Last name (optional)"
-          className="border-b-4 border-synq-accent-light"
-          style={{
-            color: "white",
-            marginLeft: 30,
-            marginTop: 20,
-            width: 300,
-            paddingVertical: 10,
-            paddingHorizontal: 15,
-            backgroundColor: '#333',
-            borderRadius: 5
-          }} />
+          className="mt-5 ml-7 w-3/4 py-3 px-4 bg-gray-800 rounded border-b-4 border-synq-accent-light"
+        />
       </View>
       <Button text="Get Started" className="bg-[#7DFFA6]" onPress={handleGetStarted} />
     </View>

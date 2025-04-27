@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { auth, createUserWithEmailAndPassword } from "./firebaseConfig";
 import { View, Text, TouchableOpacity, Alert, TextInput, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { Button } from "../../components/Themed";
+import axios from 'axios';
+import { ENV_VARS } from "../../../config";
 
 interface AuthProps {
     navigation: any;
@@ -11,18 +13,29 @@ export const SignUpWithEmail = ({ navigation }: AuthProps) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [isLogin, setIsLogin] = useState(false);
 
     const handleEmailSignUp = async () => {
         if (password !== confirmPassword) {
             Alert.alert("Passwords do not match");
             return;
         }
+
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            navigation.navigate("StepTwo", { user: userCredential.user });
+            const response = await axios.post(
+                ENV_VARS.TOKEN_URL,
+                {
+                    email: email,
+                    password: password,
+                    returnSecureToken: true
+                }
+            );
+
+            const { idToken, localId } = response.data;
+            navigation.navigate("StepTwo", { user: userCredential.user, idToken, localId });
+
         } catch (error: any) {
             Alert.alert("Error", error.message);
         }
@@ -31,65 +44,32 @@ export const SignUpWithEmail = ({ navigation }: AuthProps) => {
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View className="flex-1 justify-center">
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("Welcome")}
-                    style={{ position: "absolute", top: 60, right: 20, zIndex: 3 }}
-                >
-                    <Text style={{ fontSize: 28, color: "white" }}>×</Text>
-                </TouchableOpacity>
-
                 <View className="mb-20">
-                    <Text style={{ color: "white", fontSize: 32, fontFamily: 'JosefinSans_400Regular', width: 300, marginLeft: 30, marginTop: 90 }}>
+                    <Text className="text-white text-3xl font-sans ml-7 mt-20 w-72">
                         What's your email?
                     </Text>
                     <TextInput
                         value={email}
                         onChangeText={setEmail}
                         placeholder="Enter email"
-                        style={{
-                            color: "white",
-                            marginLeft: 30,
-                            marginTop: 20,
-                            width: 300,
-                            paddingVertical: 10,
-                            paddingHorizontal: 15,
-                            backgroundColor: '#333',
-                            borderRadius: 5
-                        }} />
+                        className="text-white ml-7 mt-5 w-80 py-3 px-4 bg-gray-800 rounded"
+                    />
                     <TextInput
                         value={password}
                         onChangeText={setPassword}
                         placeholder="Enter password"
                         secureTextEntry
-                        style={{
-                            color: "white",
-                            marginLeft: 30,
-                            marginTop: 20,
-                            width: 300,
-                            paddingVertical: 10,
-                            paddingHorizontal: 15,
-                            backgroundColor: '#333',
-                            borderRadius: 5
-                        }} />
-                    {!isLogin && (
+                        className="text-white ml-7 mt-5 w-80 py-3 px-4 bg-gray-800 rounded"
+                    />
                         <TextInput
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             placeholder="Confirm password"
                             secureTextEntry
-                            style={{
-                                color: "white",
-                                marginLeft: 30,
-                                marginTop: 20,
-                                width: 300,
-                                paddingVertical: 10,
-                                paddingHorizontal: 15,
-                                backgroundColor: '#333',
-                                borderRadius: 5
-                            }} />
-                    )}
-                    <TouchableOpacity onPress={handleEmailSignUp} style={{ marginTop: 60 }}>
-                        <Button text="Create Account" onPress={handleEmailSignUp} style={{ backgroundColor: '#7DFFA6' }} />
+                            className="text-white ml-7 mt-5 w-80 py-3 px-4 bg-gray-800 rounded"
+                        />
+                    <TouchableOpacity onPress={handleEmailSignUp} className="mt-14">
+                        <Button text="Create Account" onPress={handleEmailSignUp} className="bg-[#7DFFA6]" />
                     </TouchableOpacity>
                 </View>
             </View>
