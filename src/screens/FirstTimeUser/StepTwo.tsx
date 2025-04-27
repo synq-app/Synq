@@ -33,16 +33,15 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
           displayName: fullName, 
         });
       }
-
       const userData = {
-        email: user.email,  
-        // need phone number to be optional
-        phoneNumber: "301-299-4541",
+        email: user.email !== undefined ? user.email : null,  
+        phoneNumber: user.phoneNumber !== undefined ? user.phoneNumber : null,
         id: localId, 
         username: firstName + "_" + lastName,
         firstName: firstName,
         lastName: lastName,
       };
+      console.log('User data: ', userData)
 
       const synqApiUrl = `https://synq.azurewebsites.net/api/users/${localId}`;
       
@@ -68,13 +67,13 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
           value={firstName}
           onChangeText={setFirstName}
           placeholder="First name"
-          className="mt-5 ml-7 w-3/4 py-3 px-4 bg-gray-800 rounded border-b-4 border-synq-accent-light"
+          className="mt-5 ml-7 w-3/4 py-3 px-4 bg-gray-800 rounded border-b-4 border-synq-accent-light text-white"
         />
         <TextInput
           value={lastName}
           onChangeText={setLastName}
           placeholder="Last name (optional)"
-          className="mt-5 ml-7 w-3/4 py-3 px-4 bg-gray-800 rounded border-b-4 border-synq-accent-light"
+          className="mt-5 ml-7 w-3/4 py-3 px-4 bg-gray-800 rounded border-b-4 border-synq-accent-light text-white"
         />
       </View>
       <Button text="Get Started" className="bg-[#7DFFA6]" onPress={handleGetStarted} />
