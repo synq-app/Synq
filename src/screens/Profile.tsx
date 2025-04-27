@@ -99,7 +99,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           const userData = userDocSnap.data();
           const fullStateName = userData.state || 'Not available';
           const stateAbbreviation = stateAbbreviations[fullStateName] || fullStateName;
-          setSynqTime(userData?.activeSynqTime || null); 
+          setSynqTime(userData?.activeSynqTime || null);
           setCity(userData.city || 'Not available');
           setState(stateAbbreviation);
           setMemo(userData.memo || '');
@@ -109,7 +109,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       });
       return () => unsubscribe();
     }
-  }, []); 
+  }, []);
 
   const fetchTopConnections = async () => {
     try {
@@ -279,8 +279,9 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   }, []);
 
   const topFriends = [
-    { id: 1, name: "Alex", streak: 10 },
-    { id: 2, name: "Jamie", streak: 8 }
+    { id: 1, name: "Alex", streak: 10, photo: "https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80" },
+    { id: 2, name: "Cam", streak: 2, photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1887&q=80" },
+    { id: 3, name: "Jamie", streak: 8, photo: "https://images.unsplash.com/photo-1611703372231-02ffff8abee6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=986&q=80" }
   ];
 
   const favoritedActivities = [
@@ -352,40 +353,52 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         </TouchableOpacity>
       </Modal>
 
-        <View className="bg-black">
-          <Text className="text-lg font-medium ml-4 text-white mb-2">Top Activities</Text>
-          <View className="flex flex-row flex-wrap mt-2 ml-2 bg-black">
-            {interests.map((interest, index) => (
-              <View key={index} className="bg-black py-2 px-3 rounded-full mr-3 mb-3 border border-green-400">
-                <Text className="text-green-400 text-sm">{interest}</Text>
-              </View>
-            ))}
-          </View>
-          <Text className="text-lg font-bold text-white ml-4 mb-5">Top Friends</Text>
-          {topFriends.map((friend) => (
-            <View key={friend.id} className="mb-2 p-2 bg-white rounded-2xl ml-4 w-4/5">
-              <Text className="text-black">{friend.name} - Connections: {friend.streak}</Text>
+      <View className="bg-black">
+        <Text className="text-lg font-medium ml-4 text-white mb-2">Top Activities</Text>
+        <View className="flex-row ml-4">
+          {interests.map((interest, index) => (
+            <View key={interest} className="items-center mr-4">
+              <Image
+                source={{ uri: interest.photo }}
+                className="w-16 h-16 rounded-full bg-white"
+              />
+              <Text className="text-white text-xs mt-2 text-center">{interest}</Text>
             </View>
           ))}
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Add Friends')}
-            className="bg-[#7DFFA6] w-24 h-8 rounded-lg self-center justify-center mt-5"
-          >
-            <Text className="text-black text-center">Add friends</Text>
-          </TouchableOpacity>
-          <View className="flex flex-row items-center mt-5 mb-2 bg-black">
-            <TextInput
-              className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-4 pb-2 text-base ml-2"
-              placeholder="Add an interest"
-              placeholderTextColor="#aaa"
-              value={newInterest}
-              onChangeText={setNewInterest}
-            />
-            <TouchableOpacity onPress={addInterest} className="bg-[#7DFFA6] px-5 py-1 rounded-full ml-2">
-              <Text className="text-black text-lg font-bold">Add</Text>
-            </TouchableOpacity>
-          </View>
         </View>
+
+        <Text className="text-lg font-medium ml-4 text-white mb-2 mt-6">Top Synqs</Text>
+
+        <View className="flex-row ml-4 mt-6">
+          {topFriends.map((friend) => (
+            <View key={friend.id} className="items-center mr-4">
+              <Image
+                source={{ uri: friend.photo }}
+                className="w-16 h-16 rounded-full bg-white"
+              />
+              <Text className="text-white text-xs mt-2 text-center">{friend.name}</Text>
+            </View>
+          ))}
+        </View>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Add Friends')}
+          className="bg-[#7DFFA6] w-24 h-8 rounded-lg self-center justify-center mt-5"
+        >
+          <Text className="text-black text-center">Add friends</Text>
+        </TouchableOpacity>
+        <View className="flex flex-row items-center mt-5 mb-2 bg-black">
+          <TextInput
+            className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-4 pb-2 text-base ml-2"
+            placeholder="Add an interest"
+            placeholderTextColor="#aaa"
+            value={newInterest}
+            onChangeText={setNewInterest}
+          />
+          <TouchableOpacity onPress={addInterest} className="bg-[#7DFFA6] px-5 py-1 rounded-full ml-2">
+            <Text className="text-black text-lg font-bold">Add</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
       <TouchableOpacity onPress={signOut} className="bg-black w-32 h-8 rounded-lg self-center mt-10 mb-10 border border-white">
         <Text className="text-white text-center text-lg">Sign Out</Text>
       </TouchableOpacity>
