@@ -324,11 +324,11 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             />
           </TouchableOpacity>
         </View>
-        <Text className="text-2xl mt-5 font-medium text-[#7DFFA6]">{auth.currentUser?.displayName?.split(" ")[0]}</Text>
+        <Text className="text-2xl mt-5 font-medium text-[#7DFFA6]">{auth.currentUser?.displayName}</Text>
         <View>
           <Text>{memo || ""}</Text>
         </View>
-        <Text className="text-sm ml-4">Location: {city}, {state}</Text>
+        <Text className="text-sm ml-4">{city}, {state}</Text>
         {/* <Text className="text-white">  {synqTime !== null ? `Active Synq Time: ${formatTime(synqTime)}` : '00:00:00'}
         </Text> */}
       </View>
@@ -355,21 +355,29 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
 
       <View className="bg-black">
         <Text className="text-lg font-medium ml-4 text-white mb-2">Top Activities</Text>
-        <View className="flex-row ml-4">
-          {interests.map((interest, index) => (
-            <View key={interest} className="items-center mr-4">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="ml-4"
+        >
+          {interests.map((interest) => (
+            <View key={interest} className="items-center mr-6">
               <Image
-                source={{ uri: interest.photo }}
+                source={{ uri: interest || 'https://yourcdn.com/default.jpg' }}
                 className="w-16 h-16 rounded-full bg-white"
               />
               <Text className="text-white text-xs mt-2 text-center">{interest}</Text>
             </View>
           ))}
-        </View>
+        </ScrollView>
 
         <Text className="text-lg font-medium ml-4 text-white mb-2 mt-6">Top Synqs</Text>
 
-        <View className="flex-row ml-4 mt-6">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="ml-4 mt-6"
+        >
           {topFriends.map((friend) => (
             <View key={friend.id} className="items-center mr-4">
               <Image
@@ -379,13 +387,14 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
               <Text className="text-white text-xs mt-2 text-center">{friend.name}</Text>
             </View>
           ))}
-          <TouchableOpacity onPress={() => navigation.navigate('Add Friends')} className="items-center">
+
+          <TouchableOpacity onPress={() => navigation.navigate('Add Friends')} className="items-center mr-4">
             <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
               <Text className="text-green-400 text-3xl">+</Text>
             </View>
             <Text className="text-white text-xs mt-2 text-center">Add</Text>
           </TouchableOpacity>
-        </View>
+        </ScrollView>
         <View className="flex flex-row items-center mt-5 mb-2 bg-black">
           <TextInput
             className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-4 pb-2 text-base ml-2"
