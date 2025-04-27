@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
+import * as Location from 'expo-location';  
+import { ENV_VARS } from '../../config';
 
 const db = getFirestore();
 const auth = getAuth();
 
-const OPEN_CAGE_API_KEY = '53a680c9fd6343c2a3d7d53958216851';
+const OPEN_CAGE_API_KEY = ENV_VARS.OPEN_CAGE_API_KEY;
 
 type AuthProps = {
     navigation: any;
@@ -17,50 +18,45 @@ type AuthProps = {
 export const GettingStarted = ({ navigation }: AuthProps) => {
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
-    const [filteredCities, setFilteredCities] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const handleChangeText = async (text: string) => {
-        setCity(text);
+    useEffect(() => {
+        const getLocation = async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Permission to access location was denied');
+                return;
+            }
 
-        if (text.trim() === '') {
-            setFilteredCities([]);
-            return;
-        }
+            const { coords } = await Location.getCurrentPositionAsync({});
+            reverseGeocode(coords.latitude, coords.longitude);
+        };
 
-        setLoading(true);
+        const reverseGeocode = async (latitude: number, longitude: number) => {
+            try {
+                const response = await axios.get('https://api.opencagedata.com/geocode/v1/json', {
+                    params: {
+                        q: `${latitude},${longitude}`,
+                        key: OPEN_CAGE_API_KEY,
+                    },
+                });
 
-        try {
-            const response = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
-                params: {
-                    q: text,
-                    key: OPEN_CAGE_API_KEY,
-                    limit: 5,
-                },
-            });
+                const result = response.data.results[0];
+                const cityName = result.components.city || result.components.town || result.components.village;
+                const stateName = result.components.state || result.components.region;
 
-            const cities = response.data.results.map((item: any) => ({
-                city: item.components.city || item.components.town || item.components.village,
-                state: item.components.state || item.components.region,
-            }));
-
-            setFilteredCities(cities);
-        } catch (error) {
-            console.error("Error fetching city data: ", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleSelectCity = (selectedCity: string, selectedState: string) => {
-        setCity(selectedCity);
-        setState(selectedState);
-        setFilteredCities([]);
-    };
+                setCity(cityName || '');
+                setState(stateName || '');
+            } catch (error) {
+                console.error('Error reverse geocoding:', error);
+            }
+        };
+        getLocation();
+    }, []);
 
     const handleSaveCity = async () => {
         if (city.trim() === '' || state.trim() === '') {
-            Alert.alert('Error', 'Please enter a city and state.');
+            Alert.alert('Error', 'Could not fetch location. Please enter a city and state manually.');
             return;
         }
 
@@ -88,24 +84,16 @@ export const GettingStarted = ({ navigation }: AuthProps) => {
                 placeholder="Enter your city"
                 placeholderTextColor="#888"
                 value={city}
-                onChangeText={handleChangeText}
+                editable={false} // Make this field non-editable if you only want to use the auto-detected city
             />
 
-            {filteredCities.length > 0 && (
-                <FlatList
-                    data={filteredCities}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity
-                            className="px-4 py-2 border-b border-gray-600"
-                            onPress={() => handleSelectCity(item.city, item.state)}
-                        >
-                            <Text className="text-white text-lg">{item.city}, {item.state}</Text>
-                        </TouchableOpacity>
-                    )}
-                    className="w-4/5 max-h-36 bg-gray-800 rounded-lg mt-2"
-                />
-            )}
+            <TextInput
+                className="h-12 w-4/5 border border-green-400 rounded-xl pl-4 text-white text-lg mb-5"
+                placeholder="Enter your state"
+                placeholderTextColor="#888"
+                value={state}
+                editable={false} // Make this field non-editable if you only want to use the auto-detected state
+            />
 
             <TouchableOpacity
                 className="bg-green-400 w-20 px-4 py-2 rounded-xl"
