@@ -83,7 +83,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [city, setCity] = useState<string>('');
   const [state, setState] = useState<string>('');
   const [memo, setMemo] = useState<string>('');
-  const [synqTime, setSynqTime] = React.useState<number | null>(null);
 
   const accountData = {
     id: auth.currentUser?.uid,
@@ -99,7 +98,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           const userData = userDocSnap.data();
           const fullStateName = userData.state || 'Not available';
           const stateAbbreviation = stateAbbreviations[fullStateName] || fullStateName;
-          setSynqTime(userData?.activeSynqTime || null);
           setCity(userData.city || 'Not available');
           setState(stateAbbreviation);
           setMemo(userData.memo || '');
@@ -283,11 +281,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     { id: 3, name: "Jamie", streak: 8, photo: "https://images.unsplash.com/photo-1611703372231-02ffff8abee6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=986&q=80" }
   ];
 
-  const favoritedActivities = [
-    { id: 1, name: "Hiking" },
-    { id: 2, name: "Wine Tasting" }
-  ];
-
   return (
     <ScrollView className="bg-black" style={{ flex: 1 }}>
       <View className="flex flex-row justify-between p-4 mt-16 mb-[-10px] bg-black">
@@ -328,8 +321,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           <Text>{memo || ""}</Text>
         </View>
         <Text className="text-sm ml-4">{city}, {state}</Text>
-        {/* <Text className="text-white">  {synqTime !== null ? `Active Synq Time: ${formatTime(synqTime)}` : '00:00:00'}
-        </Text> */}
       </View>
 
       <Modal visible={isQRExpanded} transparent animationType="fade">
@@ -353,30 +344,30 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       </Modal>
 
       <View className="bg-black">
-      <Text className="text-lg font-medium ml-4 text-white mb-2">Top Synqs</Text>
+        <Text className="text-lg font-medium ml-4 text-white mb-2">Top Synqs</Text>
 
-<ScrollView
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  className="ml-4 mt-6"
->
-  {topFriends.map((friend) => (
-    <View key={friend.id} className="items-center mr-4">
-      <Image
-        source={{ uri: friend.photo }}
-        className="w-16 h-16 rounded-full bg-white"
-      />
-      <Text className="text-white text-xs mt-2 text-center">{friend.name}</Text>
-    </View>
-  ))}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="ml-4 mt-6"
+        >
+          {topFriends.map((friend) => (
+            <View key={friend.id} className="items-center mr-4">
+              <Image
+                source={{ uri: friend.photo }}
+                className="w-16 h-16 rounded-full bg-white"
+              />
+              <Text className="text-white text-xs mt-2 text-center">{friend.name}</Text>
+            </View>
+          ))}
 
-  <TouchableOpacity onPress={() => navigation.navigate('Add Friends')} className="items-center mr-4">
-    <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
-      <Text className="text-green-400 text-3xl">+</Text>
-    </View>
-    <Text className="text-white text-xs mt-2 text-center">Add</Text>
-  </TouchableOpacity>
-</ScrollView>
+          <TouchableOpacity onPress={() => navigation.navigate('Add Friends')} className="items-center mr-4">
+            <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
+              <Text className="text-green-400 text-3xl">+</Text>
+            </View>
+            <Text className="text-white text-xs mt-2 text-center">Add</Text>
+          </TouchableOpacity>
+        </ScrollView>
         <Text className="text-lg font-medium ml-4 text-white mt-6">Top Activities</Text>
         <ScrollView
           horizontal
