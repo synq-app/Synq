@@ -379,13 +379,13 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
               <Text className="text-white text-xs mt-2 text-center">{friend.name}</Text>
             </View>
           ))}
+          <TouchableOpacity onPress={() => navigation.navigate('Add Friends')} className="items-center">
+            <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
+              <Text className="text-green-400 text-3xl">+</Text>
+            </View>
+            <Text className="text-white text-xs mt-2 text-center">Add</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Add Friends')}
-          className="bg-[#7DFFA6] w-24 h-8 rounded-lg self-center justify-center mt-5"
-        >
-          <Text className="text-black text-center">Add friends</Text>
-        </TouchableOpacity>
         <View className="flex flex-row items-center mt-5 mb-2 bg-black">
           <TextInput
             className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-4 pb-2 text-base ml-2"
