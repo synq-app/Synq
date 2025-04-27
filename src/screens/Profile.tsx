@@ -77,12 +77,14 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [isQRExpanded, setQRExpanded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | undefined>("");
+  const [showInputModal, setShowInputModal] = useState(false);
   const [connections, setConnections] = useState<{ name: string; imageUrl: string }[]>([]);
   const [newInterest, setNewInterest] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
   const [city, setCity] = useState<string>('');
   const [state, setState] = useState<string>('');
   const [memo, setMemo] = useState<string>('');
+  const [showInput, setShowInput] = useState(false);
 
   const accountData = {
     id: auth.currentUser?.uid,
@@ -237,6 +239,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     );
   };
 
+
   const addInterest = async () => {
     if (newInterest.trim() !== '') {
       setInterests(prevInterests => {
@@ -255,10 +258,10 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         }
         return updatedInterests;
       });
-      setNewInterest('');
+      setNewInterest(''); // Clear input field
+      setShowInput(false); // Hide the input field after adding
     }
   };
-
   useEffect(() => {
     const fetchUserInterests = async () => {
       if (auth.currentUser?.uid) {
@@ -368,35 +371,57 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             <Text className="text-white text-xs mt-2 text-center">Add</Text>
           </TouchableOpacity>
         </ScrollView>
-        <Text className="text-lg font-medium ml-4 text-white mt-6">Top Activities</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="ml-4 mt-6"
-        >
-          {interests.map((interest) => (
-            <View key={interest} className="items-center mr-6">
-              <Image
-                source={{ uri: `https://picsum.photos/160/160?random=1` }}
-                className="w-16 h-16 rounded-full bg-white"
-              />
-              <Text className="text-white text-xs mt-2 text-center">{interest}</Text>
-            </View>
-          ))}
-        </ScrollView>
 
-        <View className="flex flex-row items-center mt-5 mb-2 bg-black">
-          <TextInput
-            className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-4 pb-2 text-base ml-2"
-            placeholder="Add an interest"
-            placeholderTextColor="#aaa"
-            value={newInterest}
-            onChangeText={setNewInterest}
-          />
-          <TouchableOpacity onPress={addInterest} className="bg-[#7DFFA6] px-5 py-1 rounded-full ml-2">
-            <Text className="text-black text-lg font-bold">Add</Text>
-          </TouchableOpacity>
-        </View>
+
+
+        <Text className="text-lg font-medium ml-4 text-white mt-6">Top Activities</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-6">
+        {interests.map((interest) => (
+          <View key={interest} className="items-center mr-6">
+            <Image source={{ uri: `https://picsum.photos/160/160?random=1` }} className="w-16 h-16 rounded-full bg-white" />
+            <Text className="text-white text-xs mt-2 text-center">{interest}</Text>
+          </View>
+        ))}
+        <TouchableOpacity onPress={() => setShowInputModal(true)} className="items-center mr-4">
+          <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
+            <Text className="text-green-400 text-3xl">+</Text>
+          </View>
+          <Text className="text-white text-xs mt-2 text-center">Add</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Modal for adding a new interest */}
+      <Modal visible={showInputModal} transparent animationType="fade">
+        <TouchableOpacity
+          className="flex-1 justify-center items-center bg-black bg-opacity-50"
+          activeOpacity={1}
+          onPressOut={() => setShowInputModal(false)} // Close modal on outside press
+        >
+          <View className="bg-black p-6 rounded-lg w-80">
+            <Text className="text-white text-lg mb-4">Add a New Interest</Text>
+            <TextInput
+              className="h-10 w-full bg-gray-800 text-white rounded-full pl-4 pb-2 text-base"
+              placeholder="Enter your interest"
+              placeholderTextColor="#aaa"
+              value={newInterest}
+              onChangeText={setNewInterest}
+            />
+            <View className="flex flex-row justify-between mt-4">
+              <TouchableOpacity
+                onPress={() => setShowInputModal(false)} // Close modal without saving
+                className="bg-gray-700 px-5 py-2 rounded-full"
+              >
+                <Text className="text-white">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={addInterest} className="bg-[#7DFFA6] px-5 py-2 rounded-full">
+                <Text className="text-black">Add</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+
       </View>
       <TouchableOpacity onPress={signOut} className="bg-black w-32 h-8 rounded-lg self-center mt-10 mb-10 border border-white">
         <Text className="text-white text-center text-lg">Sign Out</Text>
