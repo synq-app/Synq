@@ -2,7 +2,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, Image } from 'react-native';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import ModalScreen from '../screens/ModalScreen';
@@ -105,8 +105,21 @@ function BottomTabNavigator() {
         name="Synq"
         component={SynqScreen}
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require('../assets/animations/pulse.gif')}  // Adjusted path to your gif
+              style={{
+                width: 40,  // You can adjust size as needed
+                height: 40,
+                zIndex: 10
+              }}
+            />
+          ),
         }}
+        // options={{
+        //   tabBarIcon: ({ color }) => 
+        //   <TabBarIcon name="code" color={color} />,
+        // }}
       />
       {/* <BottomTab.Screen
         name="Network"
