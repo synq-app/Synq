@@ -7,11 +7,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { storage } from './FirstTimeUser/firebaseConfig';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
-import StatusIndicator from './Status';
 import Icon from 'react-native-vector-icons/Ionicons';
-// Ensure the file exists at the correct path or update the path accordingly
 
-const defaultPic = require('../assets/images/default-profile-pic.jpg'); // Update the path if it's different
+const defaultPic = require('../assets/images/default-profile-pic.jpg');
 
 const db = getFirestore();
 const auth = getAuth();
@@ -80,8 +78,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | undefined>("");
   const [connections, setConnections] = useState<{ name: string; imageUrl: string }[]>([]);
-  const [activeTab, setActiveTab] = useState("profile");
-  const [loading, setLoading] = useState(true);
   const [newInterest, setNewInterest] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
   const [city, setCity] = useState<string>('');
@@ -95,29 +91,15 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     displayName: auth.currentUser?.displayName,
   };
 
-  const formatTime = (timeInSeconds: number) => {
-    const hours = Math.floor(timeInSeconds / 3600);
-    const minutes = Math.floor((timeInSeconds % 3600) / 60);
-    const seconds = timeInSeconds % 60;
-
-    // Return formatted time (e.g., "01:00:21")
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   useEffect(() => {
-    // Check if user is authenticated
     if (auth.currentUser?.uid) {
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
-
-      // Set up real-time listener for changes to user document
       const unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
           const fullStateName = userData.state || 'Not available';
           const stateAbbreviation = stateAbbreviations[fullStateName] || fullStateName;
-
-          // Update state with values from Firestore
-          setSynqTime(userData?.activeSynqTime || null); // Continuously updating synqTime
+          setSynqTime(userData?.activeSynqTime || null); 
           setCity(userData.city || 'Not available');
           setState(stateAbbreviation);
           setMemo(userData.memo || '');
@@ -125,14 +107,14 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           console.log('No such document!');
         }
       });
-
-      // Cleanup listener when the component unmounts
       return () => unsubscribe();
     }
-  }, []); // Empty dependency array, so this effect only runs once on mount
+  }, []); 
+
   const fetchTopConnections = async () => {
     try {
       const connectionsSnapshot = await getDocs(collection(db, 'users'));
+      console.log('connections snapshot: ', connectionsSnapshot)
       const fetchedConnections: { name: string; imageUrl: string }[] = [];
       connectionsSnapshot.forEach(doc => {
         const userData = doc.data();
@@ -293,7 +275,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         }
       }
     };
-
     fetchUserInterests();
   }, []);
 
@@ -302,17 +283,10 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     { id: 2, name: "Jamie", streak: 8 }
   ];
 
-  const badges = [
-    { id: 1, name: "Explorer" },
-    { id: 2, name: "Foodie" }
-  ];
-
   const favoritedActivities = [
     { id: 1, name: "Hiking" },
     { id: 2, name: "Wine Tasting" }
   ];
-
-  const accentGreen = "#7DFFA6";
 
   return (
     <ScrollView className="bg-black" style={{ flex: 1 }}>
@@ -345,17 +319,17 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           >
             <Image
               source={profileImage ? { uri: profileImage } : defaultPic}
-
               className="w-40 h-40 rounded-full border-2 border-white"
             />
           </TouchableOpacity>
         </View>
-        <Text className="text-2xl mt-5 font-medium">{auth.currentUser?.displayName?.split(" ")[0]}</Text>
+        <Text className="text-2xl mt-5 font-medium text-[#7DFFA6]">{auth.currentUser?.displayName?.split(" ")[0]}</Text>
         <View>
           <Text>{memo || ""}</Text>
         </View>
-        <Text className="text-green-400 mt-4">  {synqTime !== null ? `Active Synq Time: ${formatTime(synqTime)}` : '00:00:00'}
-        </Text>
+        <Text className="text-sm ml-4">Location: {city}, {state}</Text>
+        {/* <Text className="text-white">  {synqTime !== null ? `Active Synq Time: ${formatTime(synqTime)}` : '00:00:00'}
+        </Text> */}
       </View>
 
       <Modal visible={isQRExpanded} transparent animationType="fade">
@@ -378,36 +352,27 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         </TouchableOpacity>
       </Modal>
 
-      <View className="flex flex-row justify-around mb-5 bg-black">
-        <TouchableOpacity onPress={() => setActiveTab("profile")}>
-          <Text style={{ fontSize: 16, fontWeight: activeTab === "profile" ? "bold" : "normal", color: activeTab === "profile" ? "#7DFFA6" : "white" }}>Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setActiveTab("friends")}>
-          <Text style={{ fontSize: 16, fontWeight: activeTab === "friends" ? "bold" : "normal", color: activeTab === "friends" ? "#7DFFA6" : "white" }}>Friends</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setActiveTab("badges")}>
-          <Text style={{ fontSize: 16, fontWeight: activeTab === "badges" ? "bold" : "normal", color: activeTab === "badges" ? "#7DFFA6" : "white" }}>Badges</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setActiveTab("favorites")}>
-          <Text style={{ fontSize: 16, fontWeight: activeTab === "favorites" ? "bold" : "normal", color: activeTab === "favorites" ? "#7DFFA6" : "white" }}>Favorites</Text>
-        </TouchableOpacity>
-      </View>
-
-      {activeTab === "profile" && (
         <View className="bg-black">
-          <Text className="text-lg mb-2 ml-4 mt-2 font-bold text-[#7DFFA6]">{auth.currentUser?.displayName}</Text>
-          <Text className="text-base mb-2 ml-4 mt-2">Location: {city}, {state}
-          </Text>
-          {/* <StatusIndicator status={'Available'} /> */}
-          <Text className="text-lg mt-5 font-medium ml-2 text-white mb-2">My Interests</Text>
+          <Text className="text-lg font-medium ml-4 text-white mb-2">Top Activities</Text>
           <View className="flex flex-row flex-wrap mt-2 ml-2 bg-black">
-
             {interests.map((interest, index) => (
               <View key={index} className="bg-black py-2 px-3 rounded-full mr-3 mb-3 border border-green-400">
                 <Text className="text-green-400 text-sm">{interest}</Text>
               </View>
             ))}
           </View>
+          <Text className="text-lg font-bold text-white ml-4 mb-5">Top Friends</Text>
+          {topFriends.map((friend) => (
+            <View key={friend.id} className="mb-2 p-2 bg-white rounded-2xl ml-4 w-4/5">
+              <Text className="text-black">{friend.name} - Connections: {friend.streak}</Text>
+            </View>
+          ))}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Add Friends')}
+            className="bg-[#7DFFA6] w-24 h-8 rounded-lg self-center justify-center mt-5"
+          >
+            <Text className="text-black text-center">Add friends</Text>
+          </TouchableOpacity>
           <View className="flex flex-row items-center mt-5 mb-2 bg-black">
             <TextInput
               className="h-10 w-[65%] bg-gray-800 text-white rounded-full pl-4 pb-2 text-base ml-2"
@@ -421,46 +386,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             </TouchableOpacity>
           </View>
         </View>
-      )}
-
-      {activeTab === "friends" && (
-        <View className="bg-black">
-          <Text className="text-lg font-bold text-white mt-2 ml-4 mb-5">Top Friends</Text>
-          {topFriends.map((friend) => (
-            <View key={friend.id} className="mb-2 p-2 bg-white rounded-2xl ml-4 w-4/5">
-              <Text className="text-black">{friend.name} - Connections: {friend.streak}</Text>
-            </View>
-          ))}
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Add Friends')}
-            className="bg-[#7DFFA6] w-24 h-8 rounded-lg self-center justify-center mt-5"
-          >
-            <Text className="text-black text-center">Add friends</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {activeTab === "badges" && (
-        <View className="bg-black">
-          <Text className="text-lg font-bold mb-2 mt-2 ml-2">Badges</Text>
-          {badges.map((badge) => (
-            <View key={badge.id} className="mb-2 p-2 bg-transparent rounded-md">
-              <Text className="text-white">{badge.name}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {activeTab === "favorites" && (
-        <View className="bg-black">
-          <Text className="text-lg font-bold mb-2 ml-3 mt-2">Favorited Activities</Text>
-          {favoritedActivities.map((activity) => (
-            <View key={activity.id} className="mb-2 p-2 bg-transparent rounded-md ml-3 mt-2">
-              <Text className="text-white">{activity.name}</Text>
-            </View>
-          ))}
-        </View>
-      )}
       <TouchableOpacity onPress={signOut} className="bg-black w-32 h-8 rounded-lg self-center mt-10 mb-10 border border-white">
         <Text className="text-white text-center text-lg">Sign Out</Text>
       </TouchableOpacity>
