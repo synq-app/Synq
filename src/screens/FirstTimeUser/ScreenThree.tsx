@@ -86,8 +86,7 @@ export default function ScreenThree({ navigation }: any) {
                     <FirebaseRecaptchaVerifierModal
                         ref={recaptchaVerifier}
                         firebaseConfig={app.options}
-                        // attemptInvisibleVerification={true}
-                        attemptInvisibleVerification={false}
+                        attemptInvisibleVerification={true}
 
                     />
                     <View className="mb-20">
