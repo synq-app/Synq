@@ -345,12 +345,22 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         {/* Modal for adding a new interest */}
         <Modal visible={showInputModal} transparent animationType="fade">
           <TouchableOpacity
-            className="flex-1 justify-center items-center bg-black bg-opacity-50"
+            className="flex-1 justify-center items-center bg-blur bg-opacity-50"
             activeOpacity={1}
-            onPressOut={() => setShowInputModal(false)} // Close modal on outside press
+            onPressOut={() => setShowInputModal(false)}
           >
-            <View className="bg-black p-6 rounded-lg w-80">
-              <Text className="text-white text-lg mb-4">Add a New Interest</Text>
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+              }}
+            />
+            <View className="bg-black p-6 rounded-lg w-80 border border-gray-700">
+              <Text className="text-white text-lg mb-4">What's your favorite social activity?</Text>
               <TextInput
                 className="h-10 w-full bg-gray-800 text-white rounded-full pl-4 pb-2 text-base"
                 placeholder="Enter your interest"
@@ -360,7 +370,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
               />
               <View className="flex flex-row justify-between mt-4">
                 <TouchableOpacity
-                  onPress={() => setShowInputModal(false)} // Close modal without saving
+                  onPress={() => setShowInputModal(false)}
                   className="bg-gray-700 px-5 py-2 rounded-full"
                 >
                   <Text className="text-white">Cancel</Text>
@@ -372,8 +382,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             </View>
           </TouchableOpacity>
         </Modal>
-
-
       </View>
       <TouchableOpacity onPress={signOut} className="bg-black w-32 h-8 rounded-lg self-center mt-10 mb-10 border border-white">
         <Text className="text-white text-center text-lg">Sign Out</Text>
