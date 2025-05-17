@@ -33,24 +33,24 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
           displayName: fullName, 
         });
       }
-      const userData = {
-        email: user.email !== undefined ? user.email : null,  
-        phoneNumber: user.phoneNumber !== undefined ? user.phoneNumber : null,
-        // if only using email, phone number should be able to be null
-        //phoneNumber: "202-101-2225",
-        id: localId, 
-        username: firstName + lastName,
-        firstName: firstName,
-        lastName: lastName,
-      };
+      // const userData = {
+      //   email: user.email !== undefined ? user.email : null,  
+      //   phoneNumber: user.phoneNumber !== undefined ? user.phoneNumber : null,
+      //   // if only using email, phone number should be able to be null
+      //   //phoneNumber: "202-101-2225",
+      //   id: localId, 
+      //   username: firstName + lastName,
+      //   firstName: firstName,
+      //   lastName: lastName,
+      // };
 
-      const synqApiUrl = `https://synq.azurewebsites.net/api/users/${localId}`;
+      // const synqApiUrl = `https://synq.azurewebsites.net/api/users/${localId}`;
       
-      await axios.put(synqApiUrl, userData, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
+      // await axios.put(synqApiUrl, userData, {
+      //   headers: {
+      //     Authorization: `Bearer ${idToken}`,
+      //   },
+      // });
 
       navigation.navigate("StepThree");
     } catch (error) {
