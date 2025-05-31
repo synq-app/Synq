@@ -84,7 +84,7 @@ export const GettingStarted = ({ navigation }: AuthProps) => {
                 placeholder="Enter your city"
                 placeholderTextColor="#888"
                 value={city}
-                editable={false} // Make this field non-editable if you only want to use the auto-detected city
+                editable={false} 
             />
 
             <TextInput
@@ -92,7 +92,7 @@ export const GettingStarted = ({ navigation }: AuthProps) => {
                 placeholder="Enter your state"
                 placeholderTextColor="#888"
                 value={state}
-                editable={false} // Make this field non-editable if you only want to use the auto-detected state
+                editable={false} 
             />
 
             <TouchableOpacity
