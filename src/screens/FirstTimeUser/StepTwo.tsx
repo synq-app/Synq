@@ -3,6 +3,7 @@ import { TextInput } from "react-native";
 import * as React from "react";
 import { updateProfile } from 'firebase/auth'; 
 import { useRoute, RouteProp } from "@react-navigation/native";
+import { getFirestore, doc, setDoc } from 'firebase/firestore'; // ⬅️ Firestore imports
 import axios from 'axios';
 
 interface StepTwoProps {
@@ -23,38 +24,28 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
   const route = useRoute<RouteProp<StepTwoRouteParams, 'StepTwo'>>(); 
 
   const { user, idToken, localId } = route.params || {};  
+  const db = getFirestore(); 
 
   const handleGetStarted = async () => {
-    const fullName = firstName + " " + lastName;
+    const fullName = firstName + (lastName ? ` ${lastName}` : '');
 
     try {
-      if (firstName.trim() !== "") {
+      if (firstName.trim() !== '') {
         await updateProfile(user, {
-          displayName: fullName, 
+          displayName: fullName,
         });
       }
-      // const userData = {
-      //   email: user.email !== undefined ? user.email : null,  
-      //   phoneNumber: user.phoneNumber !== undefined ? user.phoneNumber : null,
-      //   // if only using email, phone number should be able to be null
-      //   //phoneNumber: "202-101-2225",
-      //   id: localId, 
-      //   username: firstName + lastName,
-      //   firstName: firstName,
-      //   lastName: lastName,
-      // };
 
-      // const synqApiUrl = `https://synq.azurewebsites.net/api/users/${localId}`;
-      
-      // await axios.put(synqApiUrl, userData, {
-      //   headers: {
-      //     Authorization: `Bearer ${idToken}`,
-      //   },
-      // });
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: fullName,
+        createdAt: new Date()
+      });
 
       navigation.navigate("StepThree");
     } catch (error) {
-      console.error("Error updating profile or sending API request:", error);
+      console.error("Error updating profile or saving to Firestore:", error);
     }
   };
 

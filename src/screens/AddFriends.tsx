@@ -1,68 +1,135 @@
-import { FlatList, ListRenderItemInfo, TouchableOpacity } from 'react-native';
-import { User, UserRow } from '../components/UserRow';
-import { Button, Text, View } from '../components/Themed';
-import * as React from 'react';
-import { mockUsers } from '../constants/Mocks';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { getAuth } from 'firebase/auth';
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDocs,
+  query,
+  where,
+  setDoc,
+} from 'firebase/firestore';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons'; 
 
-export default function AddFriendsScreen({ navigation }: any) {
-  const [selected, setSelected] = React.useState<string[]>([]);
-  const [invited, setInvited] = React.useState<string[]>([]);
+interface AddFriendScreenProps {
+  navigation: any;
+}
 
-  const onSelectFriend = (id: string) => (selected.includes(id)
-    ? setSelected(selected.filter((x) => x !== id))
-    : setSelected([...selected, id])
-  );
+const AddFriendScreen = ({ navigation }: AddFriendScreenProps) => {
+  const [email, setEmail] = useState('');
+  const [foundUser, setFoundUser] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
-  const sendInvites = () => {
-    setInvited([...invited, ...selected]);
-    setSelected([]);
+  const auth = getAuth();
+  const db = getFirestore();
+  const currentUser = auth.currentUser;
+
+  useEffect(() => {
+    const logAllUsers = async () => {
+      const usersRef = collection(db, 'users');
+      try {
+        const snapshot = await getDocs(usersRef);
+        console.log('📋 All users in Firestore:');
+        snapshot.forEach((doc) => {
+          console.log(`🧑‍🦱 User ID: ${doc.id}`, doc.data());
+        });
+      } catch (error) {
+        console.error('❌ Error fetching users:', error);
+      }
+    };
+
+    logAllUsers();
+  }, []);
+
+  const handleSearch = async () => {
+    setLoading(true);
+    setFoundUser(null);
+    try {
+      const q = query(collection(db, 'users'), where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        Alert.alert('No user found with that email.');
+      } else {
+        const userDoc = querySnapshot.docs[0];
+        const userData = userDoc.data();
+        if (userDoc.id === currentUser?.uid) {
+          Alert.alert("That's you!");
+        } else {
+          setFoundUser({ ...userData, uid: userDoc.id });
+        }
+      }
+    } catch (err) {
+      Alert.alert('Error searching for user.');
+      console.error(err);
+    }
+    setLoading(false);
   };
 
-  const renderRow = ({ item }: ListRenderItemInfo<User>) => {
-    return (
-      <TouchableOpacity
-        disabled={invited.includes(item.id)}
-        onPress={() => onSelectFriend(item.id)}
-        className="flex-column mt-4"
-      >
-        <UserRow user={item} selected={selected.includes(item.id)} invited={invited.includes(item.id)} />
-      </TouchableOpacity>
-    );
-  };
-
-  const navigateToNetworkTab = () => {
-    navigation.navigate('Network'); // Ensure 'Network' is the name of the tab in your navigation setup
+  const handleSendRequest = async () => {
+    if (!foundUser || !currentUser) return;
+    const requestId = `${currentUser.uid}_${foundUser.uid}`;
+    try {
+      await setDoc(doc(db, 'friendRequests', requestId), {
+        from: currentUser.uid,
+        to: foundUser.uid,
+        status: 'pending',
+        timestamp: new Date(),
+      });
+      Alert.alert('Friend request sent!');
+      setFoundUser(null);
+      setEmail('');
+    } catch (err) {
+      Alert.alert('Error sending friend request.');
+      console.error(err);
+    }
   };
 
   return (
-    <View className="flex-1 items-center pt-8 mt-10">
-      <View className="w-full flex-row justify-between items-center px-8">
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text className='text-white text-3xl'>
-            {"<"}
-          </Text>
-        </TouchableOpacity>
-        <Text className="text-white text-2xl text-center flex-1 mt-2">Add Connections</Text>
-      </View>
-      <View className="w-5/6 h-full">
-            <TouchableOpacity onPress={navigateToNetworkTab} className="mt-4 p-2">
-        <Text className="text-blue-500 text-lg">Add from Contacts</Text>
+    <SafeAreaView style={{ padding: 16 }}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginBottom: 16 }}>
+        <Ionicons name="arrow-back" size={24} color="white" />
       </TouchableOpacity>
-        <Text className="text-xl mt-8 mb-4">Suggested</Text>
-        <View className="w-full border-b-2 border-solid border-synq-accent-light dark:border-synq-accent-dark" />
-        <FlatList
-          className="flex-grow"
-          data={mockUsers}
-          keyExtractor={(friend) => friend.id}
-          renderItem={renderRow}
-        />
-        {selected.length > 0 ? (
-          <Button text="Add" className="mb-20" onPress={sendInvites} />
-        ) : (
-          invited.length > 0 && <Button text="Continue" className="mb-20" onPress={() => { }} />
-        )}
-      </View>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16, color: 'white' }}>Add a Friend</Text>
+      <TextInput
+        value={email}
+        onChangeText={setEmail}
+        placeholder="Enter email address"
+        style={{
+          borderWidth: 1,
+          borderColor: '#ccc',
+          padding: 10,
+          borderRadius: 8,
+          marginBottom: 12,
+          color: 'white'
+        }}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
 
-    </View>
+      <Button title="Search" onPress={handleSearch} disabled={loading || email === ''} />
+
+      {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
+
+      {foundUser && (
+        <View
+          style={{
+            marginTop: 24,
+            padding: 16,
+            backgroundColor: '#f2f2f2',
+            borderRadius: 10,
+          }}
+        >
+          <Text style={{ fontSize: 18 }}>{foundUser.displayName || ''}</Text>
+          <Text style={{ color: '#666' }}>{foundUser.email}</Text>
+          <View style={{ marginTop: 12 }}>
+            <Button title="Send Friend Request" onPress={handleSendRequest} />
+          </View>
+        </View>
+      )}
+    </SafeAreaView>
   );
-}
+};
+
+export default AddFriendScreen;

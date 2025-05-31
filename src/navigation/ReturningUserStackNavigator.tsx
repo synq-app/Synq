@@ -28,6 +28,8 @@ import { AvailableFriends } from '../screens/AvailableFriends';
 import { GettingStarted } from '../screens/GettingStarted';
 import { SynqActivated } from '../screens/SynqActivated';
 import { ChatScreen } from '../screens/Chat';
+import { FriendsScreen } from '../screens/FriendsScreen';
+import StepThree from '../screens/FirstTimeUser/StepThree';
 
 const ReturningUserStack = createNativeStackNavigator();
 export function ReturningUserStackNavigator() {
@@ -47,6 +49,9 @@ export function ReturningUserStackNavigator() {
       <ReturningUserStack.Screen name="Add Friends" component={AddFriendsScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="Network" component={NetworkScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="AvailableFriends" component={AvailableFriends} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="AllFriends" component={FriendsScreen} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="StepThree" component={StepThree} options={{ headerShown: false }} />
+
       <ReturningUserStack.Screen name="GettingStarted" component={GettingStarted} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="SynqActivated" component={SynqActivated} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
@@ -93,12 +98,11 @@ function BottomTabNavigator() {
           ),
         })}
       />
-      <BottomTab.Screen
-        name="Chats"
-        component={ChatStackNavigator}
+        <BottomTab.Screen
+        name="Friends"
+        component={FriendsScreen}
         options={{
-          headerTitle: "",
-          tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="address-book" color={color} />,
         }}
       />
       <BottomTab.Screen
@@ -116,23 +120,18 @@ function BottomTabNavigator() {
             />
           ),
         }}
-        // options={{
-        //   tabBarIcon: ({ color }) => 
-        //   <TabBarIcon name="code" color={color} />,
-        // }}
+      // options={{
+      //   tabBarIcon: ({ color }) => 
+      //   <TabBarIcon name="code" color={color} />,
+      // }}
       />
-      {/* <BottomTab.Screen
-        name="Network"
-        component={NetworkScreen}
-        options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="address-book" color={color} />,
-        }}
-      /> */}
+
       <BottomTab.Screen
-        name="Explore"
-        component={Explore}
+        name="Chats"
+        component={ChatStackNavigator}
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="map" color={color} />,
+          headerTitle: "",
+          tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
         }}
       />
       <BottomTab.Screen

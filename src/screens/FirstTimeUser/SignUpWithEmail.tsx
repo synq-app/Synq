@@ -5,6 +5,9 @@ import { Button } from "../../components/Themed";
 import axios from 'axios';
 import { ENV_VARS } from "../../../config";
 
+// ✅ NEW: Firestore imports
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+
 interface AuthProps {
     navigation: any;
 }
@@ -23,6 +26,13 @@ export const SignUpWithEmail = ({ navigation }: AuthProps) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+
+            // ✅ NEW: Add user to Firestore
+            const db = getFirestore();
+            await setDoc(doc(db, "users", user.uid), {
+                email: user.email,
+                createdAt: new Date(),
+            });
 
             const response = await axios.post(
                 ENV_VARS.TOKEN_URL,
@@ -61,13 +71,13 @@ export const SignUpWithEmail = ({ navigation }: AuthProps) => {
                         secureTextEntry
                         className="text-white ml-7 mt-5 w-80 py-3 px-4 bg-gray-800 rounded"
                     />
-                        <TextInput
-                            value={confirmPassword}
-                            onChangeText={setConfirmPassword}
-                            placeholder="Confirm password"
-                            secureTextEntry
-                            className="text-white ml-7 mt-5 w-80 py-3 px-4 bg-gray-800 rounded"
-                        />
+                    <TextInput
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        placeholder="Confirm password"
+                        secureTextEntry
+                        className="text-white ml-7 mt-5 w-80 py-3 px-4 bg-gray-800 rounded"
+                    />
                     <TouchableOpacity onPress={handleEmailSignUp} className="mt-14">
                         <Button text="Create Account" onPress={handleEmailSignUp} className="bg-[#7DFFA6]" />
                     </TouchableOpacity>

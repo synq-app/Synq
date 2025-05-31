@@ -1,16 +1,119 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
 import { Text, View } from '../components/Themed';
-
-const notificationsData = [
-    { id: '1', name: 'Elliott Tang', message: 'added you as a connection', action: 'Accept' },
-    { id: '2', name: 'Snow Kang', message: 'wants to SYNQ', action: 'Start Chat' },
-    { id: '3', name: 'Stefanie Baarman', message: 'wants to SYNQ', action: 'Start Chat' },
-    { id: '4', name: 'Chris Miller', message: 'sent you a friend request', action: 'Accept' },
-    { id: '5', name: 'Julia Snodgrass', message: 'sent you a friend request', action: 'Accept' },
-];
+import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    onSnapshot,
+    getDoc,
+    doc,
+    updateDoc,
+    setDoc,
+    deleteDoc,
+} from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export const Notifications = ({ navigation }: any) => {
+    const [notificationsData, setNotificationsData] = useState<
+        { id: string; from: string; name: string; message: string; action: string }[]
+    >([]);
+    const db = getFirestore();
+    const auth = getAuth();
+
+    useEffect(() => {
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                console.log('No user is signed in.');
+                return;
+            }
+
+            const q = query(
+                collection(db, 'friendRequests'),
+                where('to', '==', user.uid),
+                where('status', '==', 'pending')
+            );
+
+            const unsubscribeSnapshot = onSnapshot(q, async (snapshot) => {
+                const requests = await Promise.all(
+                    snapshot.docs.map(async (docSnap) => {
+                        const data = docSnap.data();
+                        const fromRef = doc(db, 'users', data.from);
+                        const fromSnap = await getDoc(fromRef);
+                        const sender = fromSnap.exists() ? fromSnap.data() : { displayName: "Unknown User" };
+
+                        return {
+                            id: docSnap.id,
+                            from: data.from,
+                            name: sender.displayName || "Unknown User",
+                            message: 'sent you a friend request',
+                            action: 'Accept',
+                        };
+                    })
+                );
+                setNotificationsData(requests);
+            });
+
+            return () => unsubscribeSnapshot();
+        });
+
+        return () => unsubscribeAuth();
+    }, []);
+
+    const handleAccept = async (requestId: string, fromId: string) => {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            console.log('No current user in handleAccept');
+            return;
+        }
+
+        const requestRef = doc(db, 'friendRequests', requestId);
+        const requestSnap = await getDoc(requestRef);
+
+        if (!requestSnap.exists()) {
+            console.log('Request does not exist:', requestId);
+            return;
+        }
+
+        const requestData = requestSnap.data();
+
+        if (requestData.to !== currentUser.uid) {
+            console.log('Current user is not the intended recipient');
+            return;
+        }
+
+        try {
+            await updateDoc(requestRef, {
+                status: 'accepted',
+            });
+
+            await setDoc(doc(db, 'users', currentUser.uid, 'friends', fromId), {
+                uid: fromId,
+                createdAt: new Date(),
+            });
+
+            await setDoc(doc(db, 'users', fromId, 'friends', currentUser.uid), {
+                uid: currentUser.uid,
+                createdAt: new Date(),
+            });
+
+            setNotificationsData((prev) => prev.filter((req) => req.id !== requestId));
+        } catch (err) {
+            console.error('Error accepting friend request:', err);
+        }
+    };
+
+    const handleDecline = async (requestId: string) => {
+        try {
+            await deleteDoc(doc(db, 'friendRequests', requestId));
+            console.log('Friend request deleted.');
+            setNotificationsData((prev) => prev.filter((req) => req.id !== requestId));
+        } catch (err) {
+            console.error('Error declining friend request:', err);
+        }
+    };
+
     return (
         <SafeAreaView>
             <View className="w-full h-full justify-end pl-14">
@@ -24,22 +127,36 @@ export const Notifications = ({ navigation }: any) => {
 
                 <View className="flex bg-gray-900 pr-8 pb-20 rounded-t-xl gap-8">
                     <Text className="text-gray-400 self-end">Clear All</Text>
-                    <View className = "bg-gray-900" style={{ height: 450 }}>
+                    <View className="bg-gray-900" style={{ height: 450 }}>
                         <FlatList
                             data={notificationsData}
                             keyExtractor={(item) => item.id}
                             showsVerticalScrollIndicator={false}
                             renderItem={({ item }) => (
-                                <View className="mb-8 bg-gray-900">
-                                    <Text className="text-white px-5 text-lg">
-                                        <Text className="text-green-400">{item.name} </Text>
+                                <View className="mb-8 bg-gray-900 p-4 rounded-md border border-gray-700">
+                                    <Text className="text-white px-1 text-lg">
+                                        <Text className="text-green-400 font-semibold">{item.name} </Text>
                                         {item.message}
                                     </Text>
-                                    <TouchableOpacity className="self-center bg-white rounded-md w-40 py-2 mt-2">
-                                        <Text className="text-black text-lg text-center">{item.action}</Text>
-                                    </TouchableOpacity>
+                                    <View className="flex-row gap-4 justify-center mt-4 bg-gray-900">
+                                        <TouchableOpacity
+                                            onPress={() => handleAccept(item.id, item.from)}
+                                            className="bg-white px-6 py-2 rounded"
+                                        >
+                                            <Text className="text-black font-bold text-center">Accept</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={() => handleDecline(item.id)}
+                                            className="bg-gray-700 px-6 py-2 rounded"
+                                        >
+                                            <Text className="text-white font-bold text-center">Decline</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             )}
+                            ListEmptyComponent={
+                                <Text className="text-gray-400 text-center mt-10">No pending friend requests.</Text>
+                            }
                         />
                     </View>
                 </View>
