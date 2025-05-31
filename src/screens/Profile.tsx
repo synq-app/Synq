@@ -243,28 +243,45 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         </TouchableOpacity>
       </View>
       <View className="py-12 items-center bg-black">
-        <View className="w-48 h-48 flex justify-center items-center relative">
-          <TouchableOpacity
-            onPress={() => setQRExpanded(true)}
-            className="absolute opacity-50 border-2 border-green-500 rounded-md z-10 mt-24 w-48 h-42 justify-center items-center"
-          >
+        <View className="w-48 h-48 items-center justify-center relative">
+          {/* QR Code behind profile picture */}
+          <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center z-0">
             <QRCode
               value={JSON.stringify(accountData)}
-              size={195}
-              color='#050606'
+              size={190}
+              color="#050606"
               backgroundColor="white"
-              logoMargin={2}
-              logoBackgroundColor="transparent"
             />
-          </TouchableOpacity>
+          </View>
+
+          {/* Profile picture on top */}
           <TouchableOpacity
             onPress={pickImage}
-            className="absolute z-20 w-40 h-40 justify-center items-center"
+            className="z-10"
+            style={{
+              width: 160,
+              height: 160,
+              borderRadius: 80,
+              overflow: 'hidden',
+              borderWidth: 2,
+              borderColor: 'white',
+            }}
           >
             <Image
               source={profileImage ? { uri: profileImage } : defaultPic}
-              className="w-40 h-40 rounded-full border-2 border-white"
+              style={{
+                width: '100%',
+                height: '100%',
+              }}
             />
+          </TouchableOpacity>
+
+          {/* QR expand button */}
+          <TouchableOpacity
+            onPress={() => setQRExpanded(true)}
+            className="absolute bottom-[-12px] right-[-12px] bg-[#7DFFA6] rounded-full p-2 z-20"
+          >
+            <Icon name="qr-code-outline" size={24} color="#000" />
           </TouchableOpacity>
         </View>
         <Text className="text-2xl mt-5 font-medium text-[#7DFFA6]">{auth.currentUser?.displayName}</Text>
