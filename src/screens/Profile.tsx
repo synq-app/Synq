@@ -59,24 +59,42 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     }
   }, []);
 
-  const fetchTopConnections = async () => {
-    try {
-      const connectionsSnapshot = await getDocs(collection(db, 'users'));
-      const fetchedConnections: { name: string; imageUrl: string }[] = [];
-      connectionsSnapshot.forEach(doc => {
-        const userData = doc.data();
-        if (userData?.imageurl && userData?.displayName) {
-          fetchedConnections.push({
-            name: userData.displayName,
-            imageUrl: userData.imageurl,
-          });
+const fetchTopConnections = async () => {
+  try {
+    const auth = getAuth();
+    const db = getFirestore();
+
+    if (!auth.currentUser) return;
+
+    const userId = auth.currentUser.uid;
+    const friendsCol = collection(db, "users", userId, "friends");
+    const friendsSnapshot = await getDocs(friendsCol);
+
+    const friendsList = await Promise.all(
+      friendsSnapshot.docs.map(async (friendDoc) => {
+        const friendId = friendDoc.id;
+        const friendProfileRef = doc(db, "users", friendId);
+        const friendProfileSnap = await getDoc(friendProfileRef);
+
+        if (friendProfileSnap.exists()) {
+          const friendData = friendProfileSnap.data();
+          return {
+            name: friendData.displayName || "",
+            imageUrl: friendData.imageurl || "", 
+          };
+        } else {
+          return null;
         }
-      });
-      setConnections(fetchedConnections);
-    } catch (error) {
-      console.error("Error fetching top connections:", error);
-    }
-  };
+      })
+    );
+
+    const validFriends = friendsList.filter(Boolean) as { name: string; imageUrl: string }[];
+
+    setConnections(validFriends); 
+  } catch (error) {
+    console.error("Error fetching top connections:", error);
+  }
+};
 
   useEffect(() => {
     const fetchProfileImage = async () => {
@@ -226,12 +244,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     fetchUserInterests();
   }, []);
 
-  const topFriends = [
-    { id: 1, name: "Alex", streak: 10, photo: "https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80" },
-    { id: 2, name: "Cam", streak: 2, photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1887&q=80" },
-    { id: 3, name: "Jamie", streak: 8, photo: "https://images.unsplash.com/photo-1611703372231-02ffff8abee6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=986&q=80" }
-  ];
-
   return (
     <ScrollView className="bg-black" style={{ flex: 1 }}>
       <View className="flex flex-row justify-between p-4 mt-16 mb-[-10px] bg-black">
@@ -285,10 +297,10 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           </TouchableOpacity>
         </View>
         <Text className="text-2xl mt-5 font-medium text-[#7DFFA6]">{auth.currentUser?.displayName}</Text>
+        <Text className="text-sm ml-4 mt-2">{city}, {state}</Text>
         <View>
           <Text>{memo || ""}</Text>
         </View>
-        <Text className="text-sm ml-4">{city}, {state}</Text>
       </View>
 
       <Modal visible={isQRExpanded} transparent animationType="fade">
@@ -313,20 +325,22 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
 
       <View className="bg-black">
         <Text className="text-lg font-medium ml-4 text-white mb-2">Top Synqs</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="ml-4 mt-6"
-        >
-          {topFriends.map((friend) => (
-            <View key={friend.id} className="items-center mr-4">
-              <Image
-                source={{ uri: friend.photo }}
-                className="w-16 h-16 rounded-full bg-white"
-              />
-              <Text className="text-white text-xs mt-2 text-center">{friend.name}</Text>
-            </View>
-          ))}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-6">
+          {connections.length > 0 ? (
+            connections.map((connection, index) => (
+              <View key={index} className="items-center mr-4">
+                <Image
+                  source={{ uri: connection.imageUrl }}
+                  className="w-16 h-16 rounded-full bg-white"
+                />
+                <Text className="text-white text-xs mt-2 text-center" numberOfLines={1}>
+                  {connection.name}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text className="text-white ml-4">No connections found.</Text>
+          )}
 
           <TouchableOpacity onPress={() => navigation.navigate('Add Friends')} className="items-center mr-4">
             <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
@@ -335,6 +349,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             <Text className="text-white text-xs mt-2 text-center">Add</Text>
           </TouchableOpacity>
         </ScrollView>
+
 
         <Text className="text-lg font-medium ml-4 text-white mt-6">Top Activities</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-6">

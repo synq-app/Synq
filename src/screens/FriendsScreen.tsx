@@ -6,12 +6,15 @@ import {
   View,
   ActivityIndicator,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { getAuth } from 'firebase/auth';
 import { collection, getDocs, getDoc, doc, getFirestore } from 'firebase/firestore';
 
 export const FriendsScreen = ({ navigation }: any) => {
-  const [friends, setFriends] = useState<Array<{ id: string; displayName: string }>>([]);
+  const [friends, setFriends] = useState<
+    Array<{ id: string; displayName: string; photoURL: string | null }>
+  >([]);
   const [loading, setLoading] = useState(true);
 
   const auth = getAuth();
@@ -42,11 +45,13 @@ export const FriendsScreen = ({ navigation }: any) => {
               return {
                 id: friendId,
                 displayName: profileData.displayName || 'Unnamed Friend',
+                photoURL: profileData.photoURL || profileData.imageUrl || profileData.imageurl || null,
               };
             } else {
               return {
                 id: friendId,
                 displayName: 'Unknown Friend',
+                photoURL: null,
               };
             }
           })
@@ -65,50 +70,44 @@ export const FriendsScreen = ({ navigation }: any) => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
+      <View className="flex-1 justify-center items-center bg-black">
+        <ActivityIndicator size="large" color="#1DB954" />
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#121212' }}>
-      <View style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>All Friends</Text>
+    <SafeAreaView className="flex-1 bg-[#121212]">
+      <View className="flex-row justify-between items-center p-5">
+        <Text className="text-white text-2xl font-bold">All Friends</Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('AddFriends')} 
-          style={{
-            backgroundColor: '#1DB954',
-            paddingVertical: 8,
-            paddingHorizontal: 16,
-            borderRadius: 20,
-          }}
+          onPress={() => navigation.navigate('AddFriends')}
+          className="bg-[#1DB954] px-4 py-2 rounded-full"
         >
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>Add Friend</Text>
+          <Text className="text-white font-bold">Add Friend</Text>
         </TouchableOpacity>
       </View>
 
       {friends.length === 0 ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: 'gray' }}>You have no friends yet.</Text>
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-gray-400">You have no friends yet.</Text>
         </View>
       ) : (
         <FlatList
           data={friends}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingHorizontal: 20 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
           renderItem={({ item }) => (
-            <View
-              style={{
-                backgroundColor: '#1e1e1e',
-                padding: 16,
-                marginBottom: 12,
-                borderRadius: 12,
-                borderColor: '#333',
-                borderWidth: 1,
-              }}
-            >
-              <Text style={{ fontSize: 18, color: 'white' }}>{item.displayName}</Text>
+            <View className="flex-row items-center bg-[#1e1e1e] p-4 mb-3 rounded-xl border border-gray-800">
+              <Image
+                source={{
+                  uri:
+                    item.photoURL ||
+                    'https://www.gravatar.com/avatar/?d=mp&s=50',
+                }}
+                className="w-12 h-12 rounded-full mr-4"
+              />
+              <Text className="text-white text-lg">{item.displayName}</Text>
             </View>
           )}
         />
