@@ -15,9 +15,9 @@ type AuthProps = {
 export const SynqScreen = ({ navigation }: AuthProps) => {
   const [checkedTime, setCheckedTime] = useState<number>(availableTimes[0]);
   const [memo, setMemo] = useState<string>('');
-  const [synqTime, setSynqTime] = useState<number>(0); 
+  const [synqTime, setSynqTime] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
-  const [intervalId, setIntervalId] = useState<NodeJS.Timer | null>(null); 
+  const [intervalId, setIntervalId] = useState<NodeJS.Timer | null>(null);
 
   const handleSaveMemo = async () => {
     const user = auth.currentUser;
@@ -25,9 +25,9 @@ export const SynqScreen = ({ navigation }: AuthProps) => {
       const userDocRef = doc(db, 'users', user.uid);
       try {
         await setDoc(userDocRef, { memo: memo }, { merge: true });
-        console.log("Memo saved successfully.");
+        console.log('Memo saved successfully.');
       } catch (error) {
-        console.error("Error saving memo: ", error);
+        console.error('Error saving memo: ', error);
         Alert.alert('Error', 'Failed to save memo. Please try again later.');
       }
     } else {
@@ -40,7 +40,7 @@ export const SynqScreen = ({ navigation }: AuthProps) => {
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
       setDoc(userDocRef, { activeSynqTime: synqTime }, { merge: true })
         .then(() => {
-          // console.log('Synq time updated in Firestore:', synqTime);
+          console.log('Synq time updated in Firestore:', synqTime);
         })
         .catch((error) => {
           console.error('Error updating synq time in Firestore:', error);
@@ -49,18 +49,18 @@ export const SynqScreen = ({ navigation }: AuthProps) => {
   };
 
   const startTimer = () => {
-    if (isTimerRunning) return; 
+    if (isTimerRunning) return;
 
     setIsTimerRunning(true);
-    const startTime = Date.now(); 
+    const startTime = Date.now();
 
     const interval = setInterval(() => {
       const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-      setSynqTime(elapsedTime); 
+      setSynqTime(elapsedTime);
       updateSynqTimeInFirestore(elapsedTime);
     }, 1000);
 
-    setIntervalId(interval); 
+    setIntervalId(interval);
   };
 
   const stopTimer = () => {
@@ -83,55 +83,41 @@ export const SynqScreen = ({ navigation }: AuthProps) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}>
-      <View style={{ alignItems: 'center', marginTop: 20, width: '70%' }}>
-        <Text style={{ color: 'white', fontSize: 30, textAlign: 'center', marginTop: 100 }}>
-          Tap when you're free to meet up
-        </Text>
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <View className="flex-1 bg-black justify-center items-center">
+        <View className="w-[80%] items-center mt-20">
+          <Text className="text-white text-3xl text-center mt-24 font-semibold" style={{ fontFamily: 'Avenir' }}>
+            Tap when you're free to meet up
+          </Text>
 
-        <View style={{ marginBottom: 20, width: '90%' }}>
-          <TextInput
-            multiline
-            numberOfLines={4}
-            value={memo}
-            onChangeText={setMemo}
-            editable
-            style={{
-              backgroundColor: 'black',
-              width: 350,
-              borderBottomWidth: 1,
-              borderColor: '#7DFFA6',
-              color: 'white',
-              fontSize: 16,
-              textAlign: 'center',
-              marginTop: 5,
-              padding: 10,
-              fontStyle: 'italic',
-              marginLeft: -50
+          <View className="w-[90%] mb-5 mt-5">
+            <TextInput
+              multiline
+              numberOfLines={4}
+              value={memo}
+              onChangeText={setMemo}
+              editable
+              className="w-[360px] text-white text-base text-center border-b border-[#7DFFA6] bg-black px-4 py-2 italic ml-[-50px]"
+              style={{ fontFamily: 'Avenir' }}
+              placeholder="Optional note: (Anyone want to grab a drink?)"
+              placeholderTextColor="#A0A0A0"
+            />
+          </View>
+
+          <TouchableOpacity
+            onPress={() => {
+              handleSaveMemo();
+              navigation.navigate('SynqActivated');
+              isTimerRunning ? stopTimer() : startTimer();
             }}
-            placeholderTextColor="#A0A0A0"
-            placeholder="Optional note: (Anyone want to grab a drink?)"
-          />
+          >
+            <Image
+              source={require('../screens/FirstTimeUser/pulse.gif')}
+              className="w-[280px] h-[280px]"
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          onPress={() => {
-            handleSaveMemo();
-            navigation.navigate('SynqActivated');
-            // navigation.navigate('AvailableFriends');
-            // if (isTimerRunning) {
-            //   stopTimer();
-            // } else {
-            //   startTimer(); 
-            // }
-          }}
-        >
-          <Image
-            source={require('../screens/FirstTimeUser/pulse.gif')}
-            style={{ width: 280, height: 280 }}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );
