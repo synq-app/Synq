@@ -81,7 +81,7 @@ export const FriendsScreen = ({ navigation }: any) => {
       <View className="flex-row justify-between items-center p-5">
         <Text className="text-white text-2xl font-bold">All Friends</Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('AddFriends')}
+          onPress={() => navigation.navigate('Add Friends')}
           className="bg-[#1DB954] px-4 py-2 rounded-full"
         >
           <Text className="text-white font-bold">Add Friend</Text>

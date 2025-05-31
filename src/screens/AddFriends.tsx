@@ -1,24 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  ActivityIndicator,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 import { getAuth } from 'firebase/auth';
 import {
   getFirestore,
   collection,
-  doc,
-  getDocs,
   query,
   where,
+  getDocs,
   setDoc,
+  doc,
 } from 'firebase/firestore';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons } from '@expo/vector-icons';
 
 interface AddFriendScreenProps {
   navigation: any;
 }
 
 const AddFriendScreen = ({ navigation }: AddFriendScreenProps) => {
-  const [email, setEmail] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [foundUser, setFoundUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,49 +35,58 @@ const AddFriendScreen = ({ navigation }: AddFriendScreenProps) => {
   const db = getFirestore();
   const currentUser = auth.currentUser;
 
-  useEffect(() => {
-    const logAllUsers = async () => {
-      const usersRef = collection(db, 'users');
-      try {
-        const snapshot = await getDocs(usersRef);
-        console.log('📋 All users in Firestore:');
-        snapshot.forEach((doc) => {
-          console.log(`🧑‍🦱 User ID: ${doc.id}`, doc.data());
-        });
-      } catch (error) {
-        console.error('❌ Error fetching users:', error);
-      }
-    };
+const handleSearch = async () => {
+  const trimmed = searchTerm.trim();
+  if (!trimmed) return;
 
-    logAllUsers();
-  }, []);
+  setLoading(true);
+  setFoundUser(null);
 
-  const handleSearch = async () => {
-    setLoading(true);
-    setFoundUser(null);
-    try {
-      const q = query(collection(db, 'users'), where('email', '==', email));
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
-        Alert.alert('No user found with that email.');
-      } else {
-        const userDoc = querySnapshot.docs[0];
-        const userData = userDoc.data();
-        if (userDoc.id === currentUser?.uid) {
-          Alert.alert("That's you!");
-        } else {
-          setFoundUser({ ...userData, uid: userDoc.id });
-        }
+  try {
+    const usersRef = collection(db, 'users');
+
+    const emailQuery = query(usersRef, where('email', '==', trimmed));
+    const phoneQuery = query(usersRef, where('phoneNumber', '==', trimmed));
+    const nameQuery = query(usersRef, where('displayName', '==', trimmed));
+
+    const [emailSnap, phoneSnap, nameSnap] = await Promise.all([
+      getDocs(emailQuery),
+      getDocs(phoneQuery),
+      getDocs(nameQuery),
+    ]);
+
+    const allDocs = [...emailSnap.docs, ...phoneSnap.docs, ...nameSnap.docs];
+
+    const uniqueUsers = new Map<string, any>();
+    allDocs.forEach((docSnap) => {
+      if (!uniqueUsers.has(docSnap.id)) {
+        uniqueUsers.set(docSnap.id, docSnap);
       }
-    } catch (err) {
-      Alert.alert('Error searching for user.');
-      console.error(err);
+    });
+
+    uniqueUsers.delete(currentUser?.uid || '');
+
+    if (uniqueUsers.size === 0) {
+      Alert.alert('No user found with that name, email, or phone number.');
+    } else {
+      const firstDoc = Array.from(uniqueUsers.values())[0];
+      const userData = firstDoc.data();
+      setFoundUser({
+        ...userData,
+        uid: firstDoc.id,
+      });
     }
-    setLoading(false);
-  };
+  } catch (err) {
+    console.error(err);
+    Alert.alert('Error searching for user.');
+  }
+
+  setLoading(false);
+};
 
   const handleSendRequest = async () => {
     if (!foundUser || !currentUser) return;
+
     const requestId = `${currentUser.uid}_${foundUser.uid}`;
     try {
       await setDoc(doc(db, 'friendRequests', requestId), {
@@ -79,52 +97,73 @@ const AddFriendScreen = ({ navigation }: AddFriendScreenProps) => {
       });
       Alert.alert('Friend request sent!');
       setFoundUser(null);
-      setEmail('');
+      setSearchTerm('');
     } catch (err) {
-      Alert.alert('Error sending friend request.');
       console.error(err);
+      Alert.alert('Error sending friend request.');
     }
   };
 
   return (
-    <SafeAreaView style={{ padding: 16 }}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginBottom: 16 }}>
+    <SafeAreaView className="flex-1 px-4 pt-6 bg-[#121212]">
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        className="mb-4"
+        activeOpacity={0.7}
+      >
         <Ionicons name="arrow-back" size={24} color="white" />
       </TouchableOpacity>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16, color: 'white' }}>Add a Friend</Text>
+
+      <Text className="text-white text-2xl font-bold mb-6">Add a Friend</Text>
+
       <TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Enter email address"
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          padding: 10,
-          borderRadius: 8,
-          marginBottom: 12,
-          color: 'white'
-        }}
-        keyboardType="email-address"
+        value={searchTerm}
+        onChangeText={setSearchTerm}
+        placeholder="Search by name, email, or phone"
+        placeholderTextColor="#888"
+        className="border border-gray-700 rounded-lg p-3 mb-4 text-white"
         autoCapitalize="none"
+        autoCorrect={false}
       />
 
-      <Button title="Search" onPress={handleSearch} disabled={loading || email === ''} />
+      <Button
+        title="Search"
+        onPress={handleSearch}
+        disabled={loading || searchTerm.trim() === ''}
+      />
 
-      {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
+      {loading && (
+        <ActivityIndicator className="mt-6" size="large" color="#1DB954" />
+      )}
 
       {foundUser && (
-        <View
-          style={{
-            marginTop: 24,
-            padding: 16,
-            backgroundColor: '#f2f2f2',
-            borderRadius: 10,
-          }}
-        >
-          <Text style={{ fontSize: 18 }}>{foundUser.displayName || ''}</Text>
-          <Text style={{ color: '#666' }}>{foundUser.email}</Text>
-          <View style={{ marginTop: 12 }}>
-            <Button title="Send Friend Request" onPress={handleSendRequest} />
+        <View className="mt-6 p-4 bg-[#1e1e1e] rounded-xl border border-gray-800 flex-row items-center">
+          <Image
+            source={{
+              uri:
+                foundUser.photoURL ||
+                foundUser.imageUrl ||
+                foundUser.imageurl ||
+                'https://www.gravatar.com/avatar/?d=mp&s=100',
+            }}
+            className="w-16 h-16 rounded-full mr-4"
+          />
+          <View className="flex-1">
+            <Text className="text-white text-lg font-semibold">
+              {foundUser.displayName || 'Unknown'}
+            </Text>
+            <Text className="text-gray-400">{foundUser.email || ''}</Text>
+            <Text className="text-gray-400">
+              {foundUser.phoneNumber || ''}
+            </Text>
+            <TouchableOpacity
+            onPress={handleSendRequest}
+            className="mt-3 bg-[#1DB954] py-2 px-4 items-center w-3/4 rounded-lg"
+            activeOpacity={0.8}
+            >
+            <Text className="text-white">Send Friend Request</Text>
+            </TouchableOpacity>
+
           </View>
         </View>
       )}

@@ -155,7 +155,7 @@ export const Notifications = ({ navigation }: any) => {
                                 </View>
                             )}
                             ListEmptyComponent={
-                                <Text className="text-gray-400 text-center mt-10">No pending friend requests.</Text>
+                                <Text className="text-gray-400 text-center mt-10">You currently have no notifications.</Text>
                             }
                         />
                     </View>
