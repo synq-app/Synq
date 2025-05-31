@@ -19,7 +19,9 @@ export const presetActivities = {
   walking: { id: 289, name: "walking" },
   concerts: { id: 158, name: "concerts" },
   hiking: { id: 28, name: "hiking" },
-  coffee: { id: 63, name: "coffee"}
+  coffee: { id: 63, name: "coffee"},
+  surfing: { id: 67, name: "surfing"}
+
 };
 
 export const stateAbbreviations: { [key: string]: string } = {

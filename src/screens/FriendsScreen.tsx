@@ -95,7 +95,6 @@ const friendsList = await Promise.all(
       const friendDoc = await getDoc(doc(db, 'users', friendId));
       if (friendDoc.exists()) {
         const data = friendDoc.data();
-        console.log('data: ', data)
         setSelectedFriend({
           id: friendId,
           displayName: data.displayName || 'Unnamed Friend',
@@ -126,7 +125,7 @@ const friendsList = await Promise.all(
           onPress={() => navigation.navigate('Add Friends')}
           className="bg-[#1DB954] px-4 py-2 rounded-full"
         >
-          <Text className="text-white font-bold">Add Friend</Text>
+          <Text className="text-white font-bold">Add Friends</Text>
         </TouchableOpacity>
       </View>
 

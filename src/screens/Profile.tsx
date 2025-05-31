@@ -350,12 +350,10 @@ const fetchTopConnections = async () => {
           </TouchableOpacity>
         </ScrollView>
 
-
         <Text className="text-lg font-medium ml-4 text-white mt-6">Top Activities</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-6">
           {interests.map((interest) => (
             <View key={interest} className="items-center mr-6">
-              {/* Assert that interest is a key in presetActivities */}
               <Image
                 source={{
                   uri: `https://picsum.photos/id/${(presetActivities as { [key: string]: { id: number; name: string } })[interest.toLowerCase()]?.id}/200/300`,
@@ -374,7 +372,6 @@ const fetchTopConnections = async () => {
           </TouchableOpacity>
         </ScrollView>
 
-        {/* Modal for adding a new interest */}
         <Modal visible={showInputModal} transparent animationType="fade">
           <TouchableOpacity
             className="flex-1 justify-center items-center bg-blur bg-opacity-50"
