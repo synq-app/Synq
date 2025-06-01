@@ -143,7 +143,6 @@ export function ChatScreen({ navigation, route }: any) {
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 100 }}
       />
-
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={headerHeight + 24}

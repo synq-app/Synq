@@ -5,7 +5,6 @@ import { Button } from "../../components/Themed";
 import axios from 'axios';
 import { ENV_VARS } from "../../../config";
 
-// ✅ NEW: Firestore imports
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
 interface AuthProps {
@@ -27,7 +26,6 @@ export const SignUpWithEmail = ({ navigation }: AuthProps) => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // ✅ NEW: Add user to Firestore
             const db = getFirestore();
             await setDoc(doc(db, "users", user.uid), {
                 email: user.email,
