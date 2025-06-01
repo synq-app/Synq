@@ -23,20 +23,14 @@ export const FriendsScreen = ({ navigation }: any) => {
   const auth = getAuth();
   const db = getFirestore();
 
-  // Add a function to handle removal:
-const handleRemoveFriend = async (friendId: string) => {
-  try {
-    // Remove friend relationship from Firestore, e.g.:
-    // await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'friends', friendId));
-    // await deleteDoc(doc(db, 'users', friendId, 'friends', auth.currentUser.uid)); // if reciprocal
-
-    // Then update your local state to remove friend from the list:
-    setFriends((prev) => prev.filter(f => f.id !== friendId));
-    setProfileVisible(false);
-  } catch (error) {
-    console.error('Error removing friend:', error);
-  }
-};
+  const handleRemoveFriend = async (friendId: string) => {
+    try {
+      setFriends((prev) => prev.filter(f => f.id !== friendId));
+      setProfileVisible(false);
+    } catch (error) {
+      console.error('Error removing friend:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -47,46 +41,41 @@ const handleRemoveFriend = async (friendId: string) => {
           setLoading(false);
           return;
         }
-
         const userId = auth.currentUser.uid;
         const friendsCol = collection(db, 'users', userId, 'friends');
         const friendsSnapshot = await getDocs(friendsCol);
-const friendsList = await Promise.all(
-  friendsSnapshot.docs.map(async (docSnap) => {
-    const friendId = docSnap.id;
-    const friendProfileRef = doc(db, 'users', friendId);
-    const friendProfileSnap = await getDoc(friendProfileRef);
-
-    if (friendProfileSnap.exists()) {
-      const profileData = friendProfileSnap.data();
-      return {
-        id: friendId,
-        displayName: profileData.displayName || 'Unnamed Friend',
-        photoURL: profileData.photoURL || profileData.imageUrl || profileData.imageurl || null,
-        location: profileData.location || `${profileData.city || ''}${profileData.state ? ', ' + profileData.state : ''}` || 'N/A',
-        interests: profileData.interests || [],
-      };
-    } else {
-      return {
-        id: friendId,
-        displayName: 'Unknown Friend',
-        photoURL: null,
-        location: 'N/A',
-        interests: [],
-      };
-    }
-  })
-);
-
-
+        const friendsList = await Promise.all(
+          friendsSnapshot.docs.map(async (docSnap) => {
+            const friendId = docSnap.id;
+            const friendProfileRef = doc(db, 'users', friendId);
+            const friendProfileSnap = await getDoc(friendProfileRef);
+            if (friendProfileSnap.exists()) {
+              const profileData = friendProfileSnap.data();
+              return {
+                id: friendId,
+                displayName: profileData.displayName || 'Unnamed Friend',
+                photoURL: profileData.photoURL || profileData.imageUrl || profileData.imageurl || null,
+                location: profileData.location || `${profileData.city || ''}${profileData.state ? ', ' + profileData.state : ''}` || 'N/A',
+                interests: profileData.interests || [],
+              };
+            } else {
+              return {
+                id: friendId,
+                displayName: 'Unknown Friend',
+                photoURL: null,
+                location: 'N/A',
+                interests: [],
+              };
+            }
+          })
+        );
         setFriends(friendsList);
       } catch (error) {
-        console.error('🔥 Error fetching friends:', error);
+        console.error('Error fetching friends:', error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchFriends();
   }, [auth.currentUser]);
 
@@ -105,7 +94,7 @@ const friendsList = await Promise.all(
         setProfileVisible(true);
       }
     } catch (error) {
-      console.error('⚠️ Error opening profile:', error);
+      console.error('Error opening profile:', error);
     }
   };
 

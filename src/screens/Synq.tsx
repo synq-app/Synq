@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
-import { Text, View, TextInput, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
+import {
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  Image,
+} from 'react-native';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
 const db = getFirestore();
 const auth = getAuth();
 
-const availableTimes = [15, 30, 60];
-
 type AuthProps = {
   navigation: any;
 };
 
 export const SynqScreen = ({ navigation }: AuthProps) => {
-  const [checkedTime, setCheckedTime] = useState<number>(availableTimes[0]);
   const [memo, setMemo] = useState<string>('');
   const [synqTime, setSynqTime] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
@@ -25,10 +30,8 @@ export const SynqScreen = ({ navigation }: AuthProps) => {
       const userDocRef = doc(db, 'users', user.uid);
       try {
         await setDoc(userDocRef, { memo: memo }, { merge: true });
-        console.log('Memo saved successfully.');
       } catch (error) {
         console.error('Error saving memo: ', error);
-        Alert.alert('Error', 'Failed to save memo. Please try again later.');
       }
     } else {
       Alert.alert('Error', 'No user is logged in.');
@@ -38,13 +41,11 @@ export const SynqScreen = ({ navigation }: AuthProps) => {
   const updateSynqTimeInFirestore = (synqTime: number) => {
     if (auth.currentUser) {
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      setDoc(userDocRef, { activeSynqTime: synqTime }, { merge: true })
-        .then(() => {
-          console.log('Synq time updated in Firestore:', synqTime);
-        })
-        .catch((error) => {
+      setDoc(userDocRef, { activeSynqTime: synqTime }, { merge: true }).catch(
+        (error) => {
           console.error('Error updating synq time in Firestore:', error);
-        });
+        }
+      );
     }
   };
 
@@ -53,14 +54,29 @@ export const SynqScreen = ({ navigation }: AuthProps) => {
 
     setIsTimerRunning(true);
     const startTime = Date.now();
-
     const interval = setInterval(() => {
       const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
       setSynqTime(elapsedTime);
       updateSynqTimeInFirestore(elapsedTime);
     }, 1000);
-
     setIntervalId(interval);
+
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(db, 'users', user.uid);
+      setDoc(
+        userDocRef,
+        {
+          status: 'available',
+          activeSynqTime: 0,
+        },
+        { merge: true }
+      ).then(() => {
+        console.log('User status set to available.');
+      }).catch((error) => {
+        console.error('Error setting user status:', error);
+      });
+    }
   };
 
   const stopTimer = () => {
@@ -69,24 +85,39 @@ export const SynqScreen = ({ navigation }: AuthProps) => {
       setIsTimerRunning(false);
       setIntervalId(null);
 
-      if (auth.currentUser) {
-        const userDocRef = doc(db, 'users', auth.currentUser.uid);
-        setDoc(userDocRef, { activeSynqTime: synqTime }, { merge: true })
-          .then(() => {
-            console.log('Synq time saved to Firestore on stop:', synqTime);
-          })
-          .catch((error) => {
-            console.error('Error saving active Synq time to Firestore on stop:', error);
-          });
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, 'users', user.uid);
+        setDoc(
+          userDocRef,
+          {
+            activeSynqTime: synqTime,
+            status: 'unavailable',
+          },
+          { merge: true }
+        ).then(() => {
+          console.log('User status set to unavailable.');
+        }).catch((error) => {
+          console.error('Error updating user status:', error);
+        });
       }
     }
+  };
+
+  const handleSynqPress = () => {
+    handleSaveMemo();
+    navigation.navigate('SynqActivated');
+    isTimerRunning ? stopTimer() : startTimer();
   };
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View className="flex-1 bg-black justify-center items-center">
         <View className="w-[80%] items-center mt-20">
-          <Text className="text-white text-3xl text-center mt-24 font-semibold" style={{ fontFamily: 'Avenir' }}>
+          <Text
+            className="text-white text-3xl text-center mt-24 font-semibold"
+            style={{ fontFamily: 'Avenir' }}
+          >
             Tap when you're free to meet up
           </Text>
 
@@ -104,13 +135,7 @@ export const SynqScreen = ({ navigation }: AuthProps) => {
             />
           </View>
 
-          <TouchableOpacity
-            onPress={() => {
-              handleSaveMemo();
-              navigation.navigate('SynqActivated');
-              isTimerRunning ? stopTimer() : startTimer();
-            }}
-          >
+          <TouchableOpacity onPress={handleSynqPress}>
             <Image
               source={require('../screens/FirstTimeUser/pulse.gif')}
               className="w-[280px] h-[280px]"
