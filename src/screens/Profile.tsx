@@ -256,17 +256,14 @@ const fetchTopConnections = async () => {
       </View>
       <View className="py-12 items-center bg-black">
         <View className="w-48 h-48 items-center justify-center relative">
-          {/* QR Code behind profile picture */}
           <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center z-0">
             <QRCode
               value={JSON.stringify(accountData)}
-              size={190}
+              size={200}
               color="#050606"
               backgroundColor="white"
             />
           </View>
-
-          {/* Profile picture on top */}
           <TouchableOpacity
             onPress={pickImage}
             className="z-10"
@@ -287,8 +284,6 @@ const fetchTopConnections = async () => {
               }}
             />
           </TouchableOpacity>
-
-          {/* QR expand button */}
           <TouchableOpacity
             onPress={() => setQRExpanded(true)}
             className="absolute bottom-[-12px] right-[-12px] bg-[#7DFFA6] rounded-full p-2 z-20"
@@ -302,7 +297,6 @@ const fetchTopConnections = async () => {
           <Text>{memo || ""}</Text>
         </View>
       </View>
-
       <Modal visible={isQRExpanded} transparent animationType="fade">
         <TouchableOpacity
           className="flex-1 justify-center items-center"
@@ -325,7 +319,7 @@ const fetchTopConnections = async () => {
 
       <View className="bg-black">
         <Text className="text-lg font-medium ml-4 text-white mb-2">Top Synqs</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-6">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-4">
           {connections.length > 0 ? (
             connections.map((connection, index) => (
               <View key={index} className="items-center mr-4">
@@ -341,17 +335,9 @@ const fetchTopConnections = async () => {
           ) : (
             <Text className="text-white ml-4">No connections found.</Text>
           )}
-
-          <TouchableOpacity onPress={() => navigation.navigate('Add Friends')} className="items-center mr-4">
-            <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
-              <Text className="text-green-400 text-3xl">+</Text>
-            </View>
-            <Text className="text-white text-xs mt-2 text-center">Add</Text>
-          </TouchableOpacity>
         </ScrollView>
-
         <Text className="text-lg font-medium ml-4 text-white mt-6">Top Activities</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-6">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-4">
           {interests.map((interest) => (
             <View key={interest} className="items-center mr-6">
               <Image
@@ -363,7 +349,6 @@ const fetchTopConnections = async () => {
               <Text className="text-white text-xs mt-2 text-center">{interest}</Text>
             </View>
           ))}
-
           <TouchableOpacity onPress={() => setShowInputModal(true)} className="items-center mr-4">
             <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
               <Text className="text-green-400 text-3xl">+</Text>
