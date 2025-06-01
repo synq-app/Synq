@@ -40,14 +40,15 @@ export function ChatScreen({ navigation, route }: any) {
   const headerHeight = useHeaderHeight();
   const auth = getAuth();
   const db = getFirestore();
-
   const currentUserId = auth.currentUser?.uid;
+
   const otherUser = users.find((u) => u.id !== currentUserId);
   const chatTitle = otherUser ? `You & ${otherUser.firstName}` : 'Chat';
 
   useEffect(() => {
     const fetchCurrentUserProfile = async () => {
       if (!currentUserId) return;
+
       const docRef = doc(db, 'users', currentUserId);
       const docSnap = await getDoc(docRef);
 
@@ -66,6 +67,7 @@ export function ChatScreen({ navigation, route }: any) {
         });
       }
     };
+
     fetchCurrentUserProfile();
   }, [currentUserId]);
 
@@ -89,7 +91,6 @@ export function ChatScreen({ navigation, route }: any) {
 
   const renderItem = ({ item }: { item: Message }) => {
     const isCurrentUser = item.sender.id === currentUserId;
-
     const timeString = new Date(item.timestamp).toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
@@ -97,30 +98,33 @@ export function ChatScreen({ navigation, route }: any) {
 
     return (
       <View
-        className={`flex-row items-end my-2 px-4 ${
-          isCurrentUser ? 'justify-end' : 'justify-start'
-        }`}
+        className={`px-4 my-2 ${isCurrentUser ? 'items-end' : 'items-start'}`}
       >
-        {!isCurrentUser && (
-          <Image
-            source={{ uri: item.sender.photoURL || 'https://www.gravatar.com/avatar/?d=mp' }}
-            className="w-9 h-9 rounded-full mr-2"
-          />
-        )}
-        <View
-          className={`p-3 rounded-xl max-w-[75%] ${
-            isCurrentUser ? 'bg-green-500' : 'bg-gray-800'
-          }`}
-        >  
-          <Text className="text-white">{item.text}</Text>
-          <Text className="text-gray-300 text-xs mt-1 text-right">{timeString}</Text>
+        <View className="flex-row items-end">
+          {!isCurrentUser && (
+            <Image
+              source={{ uri: item.sender.photoURL || 'https://www.gravatar.com/avatar/?d=mp' }}
+              className="w-9 h-9 rounded-full mr-2"
+            />
+          )}
+          <View
+            className={`p-3 rounded-xl max-w-[75%] ${
+              isCurrentUser ? 'bg-green-500' : 'bg-gray-800'
+            }`}
+          >
+            <Text className="text-white font-bold mb-1">{item.sender.firstName}</Text>
+            <Text className="text-white">{item.text}</Text>
+          </View>
+          {isCurrentUser && (
+            <Image
+              source={{ uri: item.sender.photoURL || 'https://www.gravatar.com/avatar/?d=mp' }}
+              className="w-9 h-9 rounded-full ml-2"
+            />
+          )}
         </View>
-        {isCurrentUser && (
-          <Image
-            source={{ uri: item.sender.photoURL || 'https://www.gravatar.com/avatar/?d=mp' }}
-            className="w-9 h-9 rounded-full ml-2"
-          />
-        )}
+        <Text className="text-xs text-gray-400 mt-1">
+          {timeString}
+        </Text>
       </View>
     );
   };
@@ -133,12 +137,14 @@ export function ChatScreen({ navigation, route }: any) {
         </TouchableOpacity>
         <Text className="text-white text-xl font-bold flex-1 text-center mr-8">{chatTitle}</Text>
       </View>
+
       <FlatList
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 100 }}
       />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={headerHeight + 24}
