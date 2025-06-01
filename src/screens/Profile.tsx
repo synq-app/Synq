@@ -19,7 +19,6 @@ type AuthProps = {
   navigation: any;
 };
 
-
 export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [profileImage, setProfileImage] = useState<string | undefined>();
   const [isQRExpanded, setQRExpanded] = useState(false);
@@ -59,42 +58,42 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     }
   }, []);
 
-const fetchTopConnections = async () => {
-  try {
-    const auth = getAuth();
-    const db = getFirestore();
+  const fetchTopConnections = async () => {
+    try {
+      const auth = getAuth();
+      const db = getFirestore();
 
-    if (!auth.currentUser) return;
+      if (!auth.currentUser) return;
 
-    const userId = auth.currentUser.uid;
-    const friendsCol = collection(db, "users", userId, "friends");
-    const friendsSnapshot = await getDocs(friendsCol);
+      const userId = auth.currentUser.uid;
+      const friendsCol = collection(db, "users", userId, "friends");
+      const friendsSnapshot = await getDocs(friendsCol);
 
-    const friendsList = await Promise.all(
-      friendsSnapshot.docs.map(async (friendDoc) => {
-        const friendId = friendDoc.id;
-        const friendProfileRef = doc(db, "users", friendId);
-        const friendProfileSnap = await getDoc(friendProfileRef);
+      const friendsList = await Promise.all(
+        friendsSnapshot.docs.map(async (friendDoc) => {
+          const friendId = friendDoc.id;
+          const friendProfileRef = doc(db, "users", friendId);
+          const friendProfileSnap = await getDoc(friendProfileRef);
 
-        if (friendProfileSnap.exists()) {
-          const friendData = friendProfileSnap.data();
-          return {
-            name: friendData.displayName || "",
-            imageUrl: friendData.imageurl || "", 
-          };
-        } else {
-          return null;
-        }
-      })
-    );
+          if (friendProfileSnap.exists()) {
+            const friendData = friendProfileSnap.data();
+            return {
+              name: friendData.displayName || "",
+              imageUrl: friendData.imageurl || "",
+            };
+          } else {
+            return null;
+          }
+        })
+      );
 
-    const validFriends = friendsList.filter(Boolean) as { name: string; imageUrl: string }[];
+      const validFriends = friendsList.filter(Boolean) as { name: string; imageUrl: string }[];
 
-    setConnections(validFriends); 
-  } catch (error) {
-    console.error("Error fetching top connections:", error);
-  }
-};
+      setConnections(validFriends);
+    } catch (error) {
+      console.error("Error fetching top connections:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchProfileImage = async () => {
@@ -257,24 +256,18 @@ const fetchTopConnections = async () => {
       <View className="py-12 items-center bg-black">
         <View className="w-48 h-48 items-center justify-center relative">
           <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center z-0">
-            <QRCode
-              value={JSON.stringify(accountData)}
-              size={200}
-              color="#050606"
-              backgroundColor="white"
-            />
+            <View className="opacity-50 border-2 border-[#7DFFA6] rounded-xl p-1">
+              <QRCode
+                value={JSON.stringify(accountData)}
+                size={200}
+                color="#050606"
+                backgroundColor="white"
+              />
+            </View>
           </View>
           <TouchableOpacity
             onPress={pickImage}
-            className="z-10"
-            style={{
-              width: 160,
-              height: 160,
-              borderRadius: 80,
-              overflow: 'hidden',
-              borderWidth: 2,
-              borderColor: 'white',
-            }}
+            className="z-10 w-40 h-40 rounded-full overflow-hidden border-2 border-white"
           >
             <Image
               source={profileImage ? { uri: profileImage } : defaultPic}
@@ -316,7 +309,6 @@ const fetchTopConnections = async () => {
           </View>
         </TouchableOpacity>
       </Modal>
-
       <View className="bg-black">
         <Text className="text-lg font-medium ml-4 text-white mb-2">Top Synqs</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-4">
