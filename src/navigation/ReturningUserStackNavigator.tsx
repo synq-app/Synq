@@ -30,6 +30,7 @@ import { SynqActivated } from '../screens/SynqActivated';
 import { ChatScreen } from '../screens/Chat';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import StepThree from '../screens/FirstTimeUser/StepThree';
+import { AllChatsScreen } from '../screens/AllChats';
 
 const ReturningUserStack = createNativeStackNavigator();
 export function ReturningUserStackNavigator() {
@@ -51,6 +52,8 @@ export function ReturningUserStackNavigator() {
       <ReturningUserStack.Screen name="AvailableFriends" component={AvailableFriends} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="AllFriends" component={FriendsScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="StepThree" component={StepThree} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="Chats" component={ChatStackNavigator} options={{ headerShown: false }} />
+            <ReturningUserStack.Screen name="AllChats" component={AllChatsScreen} options={{ headerShown: false }} />
 
       <ReturningUserStack.Screen name="GettingStarted" component={GettingStarted} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="SynqActivated" component={SynqActivated} options={{ headerShown: false }} />
