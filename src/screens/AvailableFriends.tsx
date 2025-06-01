@@ -1,18 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  Text,
-  View,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  SafeAreaView,
-  ActivityIndicator,
-} from 'react-native';
-import { getFirestore, collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { Text, View, FlatList, TouchableOpacity,Image, SafeAreaView, ActivityIndicator,} from 'react-native';
 import { getAuth } from 'firebase/auth';
-
-const db = getFirestore();
-const auth = getAuth();
+import { getFirestore, collection, getDocs, getDoc, doc } from 'firebase/firestore';
 
 type AuthProps = {
   navigation: any;
@@ -20,14 +9,10 @@ type AuthProps = {
 
 type Friend = {
   id: string;
-  firstName: string;
-  lastName: string;
-  photoUrl: any;
-  availability?: {
-    location: {
-      latitude: number;
-    };
-  };
+  displayName: string;
+  photoURL: string | null;
+  memo?: string;
+  activeSynqTime?: number;
 };
 
 export const AvailableFriends = ({ navigation }: AuthProps) => {
@@ -36,69 +21,75 @@ export const AvailableFriends = ({ navigation }: AuthProps) => {
   const [loading, setLoading] = useState<boolean>(true);
   const flatListRef = useRef<FlatList>(null);
 
-useEffect(() => {
-  const fetchFriendsStatus = async () => {
-    setLoading(true);
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
+  const auth = getAuth();
+  const db = getFirestore();
 
-      // 1. Get list of current user's friends
-      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-      const friendIds = userDoc.data()?.friends || [];
+  useEffect(() => {
+    const fetchAvailableFriends = async () => {
+      try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          console.log('No authenticated user found.');
+          setAvailableFriends([]);
+          setLoading(false);
+          return;
+        }
 
-      console.log('🧑‍🤝‍🧑 Friend IDs:', friendIds);
+        const friendsCol = collection(db, 'users', currentUser.uid, 'friends');
+        const friendsSnapshot = await getDocs(friendsCol);
 
-      if (friendIds.length === 0) {
-        setAvailableFriends([]);
+        const friendsList: Friend[] = [];
+
+        for (const friendDoc of friendsSnapshot.docs) {
+          const friendId = friendDoc.id;
+          const friendProfileRef = doc(db, 'users', friendId);
+          const friendProfileSnap = await getDoc(friendProfileRef);
+
+          if (friendProfileSnap.exists()) {
+            const profileData = friendProfileSnap.data();
+            const activeSynqTime = profileData.activeSynqTime || 0;
+            const isAvailable = activeSynqTime > 0;
+
+            if (isAvailable) {
+              friendsList.push({
+                id: friendId,
+                displayName: profileData.displayName || 'Unnamed Friend',
+                photoURL:
+                  profileData.photoURL ||
+                  profileData.imageUrl ||
+                  profileData.imageurl ||
+                  null,
+                memo: profileData.memo || '',
+                activeSynqTime,
+              });
+            }
+          }
+        }
+        setAvailableFriends(friendsList);
+      } catch (error) {
+        console.error('Error fetching available friends:', error);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      // 2. Fetch each friend individually to get full status
-      const friendPromises = friendIds.map(async (friendId: string) => {
-        const friendDoc = await getDoc(doc(db, 'users', friendId));
-        const data = friendDoc.data();
-        console.log(`📦 Friend ${friendId}:`, { name: `${data?.firstName} ${data?.lastName}`, status: data?.status });
-
-        return {
-          id: friendId,
-          firstName: data?.firstName,
-          lastName: data?.lastName,
-          photoUrl: { uri: data?.photoUrl },
-          availability: data?.availability,
-          status: data?.status,
-        };
-      });
-
-      const allFriends = await Promise.all(friendPromises);
-      const available = allFriends.filter(friend => friend.status === 'available');
-
-      setAvailableFriends(available);
-    } catch (error) {
-      console.error('❌ Error fetching friend statuses:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchFriendsStatus();
-}, []);
+    };
+    fetchAvailableFriends();
+  }, []);
 
   const toggleSelection = (id: string) => {
-    setSelectedFriends(prevSelected =>
-      prevSelected.includes(id)
-        ? prevSelected.filter(friendId => friendId !== id)
-        : [...prevSelected, id]
-    );
+    setSelectedFriends((prevSelected) => {
+      if (prevSelected.includes(id)) {
+        return prevSelected.filter((friendId) => friendId !== id);
+      } else {
+        return [...prevSelected, id];
+      }
+    });
   };
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-1000 justify-center items-center">
-        <ActivityIndicator size="large" color="#7DFFA6" />
-        <Text className="text-white mt-4">Loading available friends...</Text>
-      </SafeAreaView>
+      <View className="flex-1 justify-center items-center bg-black">
+        <ActivityIndicator size="large" color="#1DB954" />
+      </View>
     );
   }
 
@@ -106,7 +97,7 @@ useEffect(() => {
     <SafeAreaView className="flex-1 bg-gray-1000">
       <View className="flex-row justify-between items-center px-6 pb-4 mt-8">
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text className="text-white text-2xl">{"<"}</Text>
+          <Text className="text-white text-2xl">{'<'}</Text>
         </TouchableOpacity>
         <Text className="text-white text-2xl flex-1 text-center mt-4">
           Available Friends
@@ -129,26 +120,25 @@ useEffect(() => {
                 isSelected ? 'border-green-400' : 'border-white'
               }`}
             >
-              <Image source={item.photoUrl} className="w-12 h-12 rounded-full mr-4" />
+              <Image
+                source={{
+                  uri:
+                    item.photoURL ||
+                    'https://www.gravatar.com/avatar/?d=mp&s=50',
+                }}
+                className="w-12 h-12 rounded-full mr-4"
+              />
               <View>
-                <Text className="text-white text-lg">{`${item.firstName} ${item.lastName}`}</Text>
+                <Text className="text-white text-lg">{item.displayName}</Text>
                 <Text className="text-gray-400 text-sm">
-                  {item.availability?.location?.latitude
-                    ? `${item.availability.location.latitude.toFixed(2)} miles away`
-                    : 'Distance unknown'}
+                  {item.memo || ''}
                 </Text>
               </View>
             </TouchableOpacity>
           );
         }}
         contentContainerStyle={{ paddingBottom: 80 }}
-        ListEmptyComponent={
-          <Text className="text-center text-gray-400 mt-10">
-            No friends are currently available.
-          </Text>
-        }
       />
-
       <TouchableOpacity
         disabled={selectedFriends.length === 0}
         onPress={() => {
