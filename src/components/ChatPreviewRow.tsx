@@ -2,6 +2,7 @@ import { Image } from 'react-native';
 import { User } from './UserRow';
 import { Text, View } from './Themed';
 import { Message } from './MessageRow';
+import { JSX } from 'react';
 
 export interface ChatPreviewRowProps {
   id?: string;

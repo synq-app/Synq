@@ -112,7 +112,6 @@ export function ChatScreen({ navigation, route }: any) {
               isCurrentUser ? 'bg-green-500' : 'bg-gray-800'
             }`}
           >
-            <Text className="text-white font-bold mb-1">{item.sender.firstName}</Text>
             <Text className="text-white">{item.text}</Text>
           </View>
           {isCurrentUser && (
