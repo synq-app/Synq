@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Text, View } from '../components/Themed';
-import { Image, TouchableOpacity, Modal, StyleSheet, Alert, ScrollView, ActivityIndicator, TextInput } from 'react-native';
+import { Image, TouchableOpacity, Modal, StyleSheet, Alert, ScrollView, TextInput } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, getDocs, collection, onSnapshot } from "firebase/firestore";
 import * as ImagePicker from 'expo-image-picker';

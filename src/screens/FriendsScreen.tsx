@@ -4,7 +4,6 @@ import {
   SafeAreaView,
   Text,
   View,
-  ActivityIndicator,
   TouchableOpacity,
   Image,
 } from 'react-native';
@@ -16,7 +15,6 @@ export const FriendsScreen = ({ navigation }: any) => {
   const [friends, setFriends] = useState<
     Array<{ id: string; displayName: string; photoURL: string | null }>
   >([]);
-  const [loading, setLoading] = useState(true);
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
   const [profileVisible, setProfileVisible] = useState(false);
 
@@ -38,7 +36,6 @@ export const FriendsScreen = ({ navigation }: any) => {
         if (!auth.currentUser) {
           console.log('❌ No authenticated user found');
           setFriends([]);
-          setLoading(false);
           return;
         }
         const userId = auth.currentUser.uid;
@@ -73,7 +70,6 @@ export const FriendsScreen = ({ navigation }: any) => {
       } catch (error) {
         console.error('Error fetching friends:', error);
       } finally {
-        setLoading(false);
       }
     };
     fetchFriends();
@@ -97,14 +93,6 @@ export const FriendsScreen = ({ navigation }: any) => {
       console.error('Error opening profile:', error);
     }
   };
-
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-black">
-        <ActivityIndicator size="large" color="#1DB954" />
-      </View>
-    );
-  }
 
   return (
     <SafeAreaView className="flex-1 bg-[#121212]">
