@@ -40,7 +40,7 @@ export const SignUpWithEmail = ({ navigation }: AuthProps) => {
                     returnSecureToken: true
                 }
             );
-
+            
             const { idToken, localId } = response.data;
             navigation.navigate("StepTwo", { user: userCredential.user, idToken, localId });
 

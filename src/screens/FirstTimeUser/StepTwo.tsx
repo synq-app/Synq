@@ -1,60 +1,64 @@
-import { Text, View, Button } from '../../components/Themed';
-import { TextInput } from "react-native";
-import * as React from "react";
-import { updateProfile } from 'firebase/auth'; 
-import { useRoute, RouteProp } from "@react-navigation/native";
-import { getFirestore, doc, setDoc } from 'firebase/firestore'; // ⬅️ Firestore imports
+import React, { useState } from 'react';
+import { Text, View, TextInput } from 'react-native';
+import { Button } from '../../components/Themed';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { updateProfile } from 'firebase/auth';
 import axios from 'axios';
-
-interface StepTwoProps {
-  navigation: any;
-}
+import { auth } from './firebaseConfig';
 
 type StepTwoRouteParams = {
   StepTwo: {
     user: any;
     idToken: string; 
-    localId: string;  
+    localId: string; 
   };
 };
+
+interface StepTwoProps {
+  navigation: any;
+}
 
 export function StepTwoScreen({ navigation }: StepTwoProps) {
   const [firstName, setFirstName] = React.useState<string>('');
   const [lastName, setLastName] = React.useState<string>('');
   const route = useRoute<RouteProp<StepTwoRouteParams, 'StepTwo'>>(); 
 
-  const { user, idToken, localId } = route.params || {};  
-  const db = getFirestore(); 
+ const { user, idToken, localId } = route.params || {};  
 
   const handleGetStarted = async () => {
     const fullName = firstName + (lastName ? ` ${lastName}` : '');
 
     try {
-      if (firstName.trim() !== '') {
-        await updateProfile(user, {
-          displayName: fullName,
-        });
+      if (auth.currentUser && firstName.trim() !== '') {
+        await updateProfile(auth.currentUser, { displayName: fullName });
       }
 
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        displayName: fullName,
-        createdAt: new Date()
-      });
+      const userData = {
+        email: user.email ? user.email : '',
+        phoneNumber: user.phoneNumber ? user.phoneNumber : '111-111-1112',
+        id: localId,
+        username: `${firstName}${lastName || 'user'}`,
+        firstName,
+        lastName
+      };
 
-      navigation.navigate("StepThree");
-    } catch (error) {
-      console.error("Error updating profile or saving to Firestore:", error);
+      const synqApiUrl = `https://synq.azurewebsites.net/api/users/${localId}`;
+
+      await axios.put(synqApiUrl, userData, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      navigation.navigate('StepThree');
+    } catch (error: any) {
+      console.error('Error updating profile or syncing with API:', error.message);
     }
   };
 
   return (
     <View className="flex-1 justify-center">
       <View className="mb-20">
-        <Text className="text-white text-2xl ml-7 mt-24">
-          What's your name?
-        </Text>
+        <Text className="text-white text-2xl ml-7 mt-24">What's your name?</Text>
         <TextInput
           value={firstName}
           onChangeText={setFirstName}
