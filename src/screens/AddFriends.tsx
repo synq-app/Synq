@@ -71,7 +71,6 @@ const handleSearch = async () => {
     } else {
       const firstDoc = Array.from(uniqueUsers.values())[0];
       const userData = firstDoc.data();
-      console.log('Found user:', userData);
       setFoundUser({
         ...userData,
         uid: firstDoc.id,

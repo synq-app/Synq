@@ -45,7 +45,7 @@ export const FeedScreen = ({ navigation }: any) => {
     const fetchFriends = async () => {
       try {
         if (!auth.currentUser) {
-          console.log('❌ No authenticated user found');
+          console.log('No authenticated user found');
           setFriends([]);
           return;
         }

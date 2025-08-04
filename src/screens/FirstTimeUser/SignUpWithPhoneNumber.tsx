@@ -88,7 +88,6 @@ export const SignUpWithPhoneNumber = ({ navigation }: AuthProps) => {
                     returnSecureToken: true
                 }
             );
-            console.log('----response: ', response.data)
             const { idToken, localId } = response.data;
 
       navigation.navigate('StepTwo', { user, idToken, localId });

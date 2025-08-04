@@ -211,12 +211,10 @@ const uploadProfileImageToBackend = async (userId: string, uri: string) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
     const data = await response.json();
-    console.log('✅ Profile image uploaded to backend:', data);
   } catch (error: any) {
     console.error('❌ Failed to upload profile image to backend:', error.message);
-    Alert.alert('Error', 'Could not sync profile image with server.');
+    // Alert.alert('Error', 'Could not sync profile image with server.');
   }
 };
 

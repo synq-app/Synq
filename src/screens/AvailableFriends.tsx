@@ -55,7 +55,6 @@ export const AvailableFriends = ({ navigation }: AuthProps) => {
               const isAvailable = profileData?.status === 'available';
 
               if (isAvailable) {
-                console.log('Available friends found:', profileData);
                 return {
                   id: friendId,
                   displayName: profileData.displayName || 'Unnamed Friend',
