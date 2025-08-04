@@ -51,7 +51,7 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
 
       const formattedPhone = user.phoneNumber
         ? formatPhoneNumber(user.phoneNumber)
-        : '151-151-1120'; // change this
+        : '151-151-1122'; // change this
       const email = user.email ? user.email : `${user.uid}@synq.com`;
       const username = `${firstName}${lastName || 'user'}`;
 
