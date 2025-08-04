@@ -36,7 +36,7 @@ export function FirstTimeUserNavigator() {
       <FirstTimeUserStack.Screen name="StepThree" component={StepThree} options={{ headerShown: false }}/>
 
       <FirstTimeUserStack.Screen name="IntroToAddingConnections" component={IntroToAddingConnections} options={{ headerShown: false }} />
-      <FirstTimeUserStack.Screen name="Add Friends" component={AddFriendsScreen} options={{ headerShown: false }} />
+      <FirstTimeUserStack.Screen name="AddFriends" component={AddFriendsScreen} options={{ headerShown: false }} />
       <FirstTimeUserStack.Screen name="Network" component={NetworkScreen} options={{ headerShown: false }} />
       <FirstTimeUserStack.Screen name="Notifications" component={Notifications} options={{ headerShown: false }}/>   
       <FirstTimeUserStack.Screen name="Settings" component={Settings} options={{ headerShown: false }}/>   

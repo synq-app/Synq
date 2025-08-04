@@ -31,49 +31,90 @@ export const FriendsScreen = ({ navigation }: any) => {
   };
 
   useEffect(() => {
-    const fetchFriends = async () => {
+    const fetchAllUsers = async () => {
       try {
-        if (!auth.currentUser) {
-          console.log('❌ No authenticated user found');
-          setFriends([]);
-          return;
-        }
+        if (!auth.currentUser) return;
+
         const userId = auth.currentUser.uid;
-        const friendsCol = collection(db, 'users', userId, 'friends');
-        const friendsSnapshot = await getDocs(friendsCol);
-        const friendsList = await Promise.all(
-          friendsSnapshot.docs.map(async (docSnap) => {
-            const friendId = docSnap.id;
-            const friendProfileRef = doc(db, 'users', friendId);
-            const friendProfileSnap = await getDoc(friendProfileRef);
-            if (friendProfileSnap.exists()) {
-              const profileData = friendProfileSnap.data();
-              return {
-                id: friendId,
-                displayName: profileData.displayName || 'Unnamed Friend',
-                photoURL: profileData.photoURL || profileData.imageUrl || profileData.imageurl || null,
-                location: profileData.location || `${profileData.city || ''}${profileData.state ? ', ' + profileData.state : ''}` || 'N/A',
-                interests: profileData.interests || [],
-              };
-            } else {
-              return {
-                id: friendId,
-                displayName: 'Unknown Friend',
-                photoURL: null,
-                location: 'N/A',
-                interests: [],
-              };
-            }
+        const usersCol = collection(db, 'users');
+        const usersSnapshot = await getDocs(usersCol);
+
+        const usersList = usersSnapshot.docs
+          .filter((docSnap) => {
+            const data = docSnap.data();
+            return (
+              docSnap.id !== userId &&                      // Exclude current user
+              data.firstName && typeof data.firstName === 'string' // Must have firstName
+            );
           })
-        );
-        setFriends(friendsList);
+          .map((docSnap) => {
+            const data = docSnap.data();
+            return {
+              id: docSnap.id,
+              displayName: data.displayName || data.firstName || 'Unnamed User',
+              photoURL: data.photoURL || data.imageUrl || data.imageurl || null,
+              location:
+                data.city && data.state
+                  ? `${data.city}, ${data.state}`
+                  : data.city || data.state || 'N/A',
+              interests: data.interests || [],
+            };
+          });
+
+        setFriends(usersList);
       } catch (error) {
-        console.error('Error fetching friends:', error);
-      } finally {
+        console.error('Error fetching all users:', error);
       }
     };
-    fetchFriends();
-  }, [auth.currentUser]);
+
+    fetchAllUsers();
+  }, []);
+
+
+  // useEffect(() => {
+  //   const fetchFriends = async () => {
+  //     try {
+  //       if (!auth.currentUser) {
+  //         console.log('❌ No authenticated user found');
+  //         setFriends([]);
+  //         return;
+  //       }
+  //       const userId = auth.currentUser.uid;
+  //       const friendsCol = collection(db, 'users', userId, 'friends');
+  //       const friendsSnapshot = await getDocs(friendsCol);
+  //       const friendsList = await Promise.all(
+  //         friendsSnapshot.docs.map(async (docSnap) => {
+  //           const friendId = docSnap.id;
+  //           const friendProfileRef = doc(db, 'users', friendId);
+  //           const friendProfileSnap = await getDoc(friendProfileRef);
+  //           if (friendProfileSnap.exists()) {
+  //             const profileData = friendProfileSnap.data();
+  //             return {
+  //               id: friendId,
+  //               displayName: profileData.displayName || 'Unnamed Friend',
+  //               photoURL: profileData.photoURL || profileData.imageUrl || profileData.imageurl || null,
+  //               location: profileData.location || `${profileData.city || ''}${profileData.state ? ', ' + profileData.state : ''}` || 'N/A',
+  //               interests: profileData.interests || [],
+  //             };
+  //           } else {
+  //             return {
+  //               id: friendId,
+  //               displayName: 'Unknown Friend',
+  //               photoURL: null,
+  //               location: 'N/A',
+  //               interests: [],
+  //             };
+  //           }
+  //         })
+  //       );
+  //       setFriends(friendsList);
+  //     } catch (error) {
+  //       console.error('Error fetching friends:', error);
+  //     } finally {
+  //     }
+  //   };
+  //   fetchFriends();
+  // }, [auth.currentUser]);
 
   const openProfile = async (friendId: string) => {
     try {
@@ -99,7 +140,7 @@ export const FriendsScreen = ({ navigation }: any) => {
       <View className="flex-row justify-between items-center p-5">
         <Text className="text-white text-2xl font-bold">All Friends</Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('Add Friends')}
+          onPress={() => navigation.navigate('AddFriends')}
           className="bg-[#1DB954] px-4 py-2 rounded-full"
         >
           <Text className="text-white font-bold">Add Friends</Text>

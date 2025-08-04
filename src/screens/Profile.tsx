@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Text, View } from '../components/Themed';
-import { Image, TouchableOpacity, Modal, StyleSheet, Alert, ScrollView, TextInput } from 'react-native';
+import { Image, TouchableOpacity, Modal, Alert, ScrollView, TextInput } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, getDocs, collection, onSnapshot } from "firebase/firestore";
 import * as ImagePicker from 'expo-image-picker';
@@ -9,6 +9,11 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { presetActivities, stateAbbreviations } from '../constants/Mocks';
+import axios from 'axios';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system';
+import * as mime from 'mime';
+
 
 const defaultPic = require('../assets/images/default-profile-pic.jpg');
 
@@ -60,9 +65,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
 
   const fetchTopConnections = async () => {
     try {
-      const auth = getAuth();
-      const db = getFirestore();
-
       if (!auth.currentUser) return;
 
       const userId = auth.currentUser.uid;
@@ -123,7 +125,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
@@ -136,25 +138,26 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   };
 
   const uploadImage = async (uri: string) => {
-    if (!uri) {
-      alert("No image selected.");
+    if (!uri || !auth.currentUser?.uid) {
+      alert("No image selected or user not authenticated.");
       return;
     }
 
     setIsUploading(true);
     const fileName = uri.split('/').pop();
-    const storageRef = ref(storage, `images/${auth.currentUser?.uid}/${fileName}`);
+    const storageRef = ref(storage, `images/${auth.currentUser.uid}/${fileName}`);
 
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
+
+      // Upload to Firebase Storage
       const uploadTask = uploadBytesResumable(storageRef, blob);
 
       uploadTask.on('state_changed',
-        (snapshot) => {
-        },
+        () => {}, // Optional: progress tracking
         (error) => {
-          alert("Error uploading image: " + error.message);
+          alert("Error uploading image to Firebase: " + error.message);
           setIsUploading(false);
         },
         async () => {
@@ -162,13 +165,15 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           setImageUrl(downloadURL);
           setIsUploading(false);
 
+          // Save download URL to Firestore
+          const userDocRef = doc(db, 'users', auth.currentUser!.uid);
+          await updateDoc(userDocRef, {
+            imageurl: downloadURL,
+          });
+
+          // Upload to backend API sending raw Blob without auth header
           if (auth.currentUser) {
-            const userDocRef = doc(db, 'users', auth.currentUser.uid);
-            await updateDoc(userDocRef, {
-              imageurl: downloadURL,
-            });
-          } else {
-            alert("User is not authenticated.");
+            await uploadProfileImageToBackend(auth.currentUser.uid, uri);
           }
         }
       );
@@ -177,6 +182,45 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       setIsUploading(false);
     }
   };
+const convertToPNG = async (uri: string): Promise<string> => {
+  const result = await ImageManipulator.manipulateAsync(
+    uri,
+    [], // no resize or crop, just format conversion
+    { format: ImageManipulator.SaveFormat.PNG }
+  );
+  return result.uri;
+};
+const uploadProfileImageToBackend = async (userId: string, uri: string) => {
+  try {
+    // Convert image to PNG
+    const pngUri = await convertToPNG(uri);
+
+    const responseFetch = await fetch(pngUri);
+    const blob = await responseFetch.blob();
+
+    const contentType = 'image/png'; // force png
+
+    const response = await fetch(`https://synqapp.com/api/users/${userId}/images/profileImage`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': contentType,
+      },
+      body: blob,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ Profile image uploaded to backend:', data);
+  } catch (error: any) {
+    console.error('❌ Failed to upload profile image to backend:', error.message);
+    Alert.alert('Error', 'Could not sync profile image with server.');
+  }
+};
+
+
 
   const signOut = async () => {
     Alert.alert(
@@ -394,4 +438,4 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       </TouchableOpacity>
     </ScrollView>
   );
-}
+};

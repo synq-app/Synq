@@ -1,104 +1,158 @@
-import { TouchableOpacity, Image, FlatList, ListRenderItemInfo } from "react-native";
+import React, { useEffect, useState, useMemo } from "react";
+import {
+  TouchableOpacity,
+  Image,
+  FlatList,
+  ListRenderItemInfo,
+  ActivityIndicator,
+  SafeAreaView,
+} from "react-native";
 import { Button, ScreenView, Text, View } from "../components/Themed";
-import * as React from "react";
 import clsx from "clsx";
-import { mockUsers } from "../constants/Mocks";
-import { User } from "../components/UserRow";
+import { getAuth } from "firebase/auth";
+import {
+  getFirestore,
+  collection,
+  getDoc,
+  getDocs,
+  doc,
+} from "firebase/firestore";
 import getDistance from "geolib/es/getDistance";
 import convertDistance from "geolib/es/convertDistance";
+import FriendProfilePopup from "./FriendProfilePopup";
 
-const TabOption = (props: { title: string, selected: boolean, onPress: () => void }) => {
-  return (
-    <TouchableOpacity onPress={props.onPress}>
-      <View className="items-center">
-        <Text className={clsx("p-2", props.selected && "text-synq-accent-light")} >{props.title}</Text>
-        {props.selected &&
-          <View className={"w-3/4 border-b-2 border-solid border-synq-accent-light"} />
-        }
-      </View>
-    </TouchableOpacity>
-  )
-}
 
-const FeedRow = (props: { user: User, selected: boolean, distanceAway: number }) => {
-  return (
-    <View className="flex-row justify-between items-center w-full bg-green-400">
-      <View className="flex-row w-full">
-        <View className="flex-1 pr-5">
-          <View className={"absolute flex-1 bg-white w-full h-16 top-2 left-4 rounded-md"} />
-          <View className="flex w-20 bg-transparent flex-row items-center">
-            <View className="flex bg-transparent w-auto self-start">
-              <Image className="flex w-20 h-20 rounded-full" source={props.user?.photoUrl} />
-              <Text className="flex text-xs text-center ">{props.user.firstName}</Text>
-            </View>
-            <Text className="w-52 pb-5 pl-1 text-black text-xs">{props.user.availability.memo}</Text>
-            <View className={clsx("absolute bg-white w-6 h-6 top-0 left-0 rounded-full", props.selected && "bg-green-500")} />
-          </View>
-        </View>
-        <View className="flex w-16 mt-4 items-center">
-          <Text className="text-xs">{props.distanceAway} mi</Text>
-          <Text className="text-xs text-gray-400">00:01:29</Text>
-        </View>
-      </View>
-    </View>
-  )
-}
+export const FeedScreen = ({ navigation }: any) => {
+  const [friends, setFriends] = useState<
+    Array<{ id: string; displayName: string; photoURL: string | null }>
+  >([]);
+  const [selectedFriend, setSelectedFriend] = useState<any>(null);
+  const [profileVisible, setProfileVisible] = useState(false);
 
-interface UserWithDistance extends User {
-  distanceAway: number;
-}
+  const auth = getAuth();
+  const db = getFirestore();
 
-export function FeedScreen() {
-  const tabs = ["Distance", "Name"];
-  const [selectedTab, setSelectedTab] = React.useState<string>(tabs[0]);
-  const [selected, setSelected] = React.useState<string[]>([]);
-
-  const onSelectFriend = (id: string) => (selected.includes(id)
-    ? setSelected(selected.filter((x) => x !== id))
-    : setSelected([...selected, id])
-  );
-
-  const renderRow = ({ item }: ListRenderItemInfo<UserWithDistance>) => {
-    return (
-      <TouchableOpacity
-        onPress={() => onSelectFriend(item.id)}
-        className="flex-column mt-4"
-        key={item.id}
-      >
-        <FeedRow user={item} selected={selected.includes(item.id)} distanceAway={item.distanceAway} />
-      </TouchableOpacity>
-    )
+  const handleRemoveFriend = async (friendId: string) => {
+    try {
+      setFriends((prev) => prev.filter(f => f.id !== friendId));
+      setProfileVisible(false);
+    } catch (error) {
+      console.error('Error removing friend:', error);
+    }
   };
 
-  const myMockLocation = {
-    latitude: 0,
-    longitude: 0,
-  }
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        if (!auth.currentUser) {
+          console.log('❌ No authenticated user found');
+          setFriends([]);
+          return;
+        }
+        const userId = auth.currentUser.uid;
+        const friendsCol = collection(db, 'users', userId, 'friends');
+        const friendsSnapshot = await getDocs(friendsCol);
+        const friendsList = await Promise.all(
+          friendsSnapshot.docs.map(async (docSnap) => {
+            const friendId = docSnap.id;
+            const friendProfileRef = doc(db, 'users', friendId);
+            const friendProfileSnap = await getDoc(friendProfileRef);
+            if (friendProfileSnap.exists()) {
+              const profileData = friendProfileSnap.data();
+              return {
+                id: friendId,
+                displayName: profileData.displayName || 'Unnamed Friend',
+                photoURL: profileData.photoURL || profileData.imageUrl || profileData.imageurl || null,
+                location: profileData.location || `${profileData.city || ''}${profileData.state ? ', ' + profileData.state : ''}` || 'N/A',
+                interests: profileData.interests || [],
+              };
+            } else {
+              return {
+                id: friendId,
+                displayName: 'Unknown Friend',
+                photoURL: null,
+                location: 'N/A',
+                interests: [],
+              };
+            }
+          })
+        );
+        setFriends(friendsList);
+      } catch (error) {
+        console.error('Error fetching friends:', error);
+      } finally {
+      }
+    };
+    fetchFriends();
+  }, [auth.currentUser]);
 
-  const getDistanceAway = (user: User) => {
-    return Math.floor(convertDistance(getDistance(myMockLocation, user.availability.location), "mi"))
-  }
-
-  const usersWithDistance = React.useMemo(() => {
-    return mockUsers.map((user: User) => ({ ...user, distanceAway: getDistanceAway(user) }))
-  }, [getDistanceAway])
+  const openProfile = async (friendId: string) => {
+    try {
+      const friendDoc = await getDoc(doc(db, 'users', friendId));
+      if (friendDoc.exists()) {
+        const data = friendDoc.data();
+        setSelectedFriend({
+          id: friendId,
+          displayName: data.displayName || 'Unnamed Friend',
+          photoURL: data.photoURL || data.imageUrl || data.imageurl || null,
+          location: data.city + ", " + data.state || '',
+          interests: data.interests || [],
+        });
+        setProfileVisible(true);
+      }
+    } catch (error) {
+      console.error('Error opening profile:', error);
+    }
+  };
 
   return (
-    <ScreenView className="justify-start pl-4 pr-2 pb-0">
-      <View className="mt-10">
-        <Text className='text-center text-gray-500'>Sort By</Text>
-        <View className="flex-row w-full justify-evenly my-4">
-          {tabs.map((tab: string) =>
-            <TabOption title={tab} key={tab} selected={selectedTab === tab} onPress={() => setSelectedTab(tab)} />
-          )}
-        </View>
+    <SafeAreaView className="flex-1 bg-[#121212]">
+      <View className="flex-row justify-between items-center p-5">
+        <Text className="text-white text-2xl font-bold">All Friends</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('AddFriends')}
+          className="bg-[#1DB954] px-4 py-2 rounded-full"
+        >
+          <Text className="text-white font-bold">Add Friends</Text>
+        </TouchableOpacity>
       </View>
-      <FlatList
-        data={usersWithDistance.sort((a, b) => selectedTab == "Distance" ? (a.distanceAway > b.distanceAway ? 1 : -1) : a.firstName.localeCompare(b.firstName))}
-        keyExtractor={(friend) => friend.id}
-        renderItem={(user) => renderRow(user)}
-      />
-      <Button text="Invite to SYNQ" />
-    </ScreenView>
-  )
-}
+
+      {friends.length === 0 ? (
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-gray-400">You have no friends yet.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={friends}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => openProfile(item.id)}
+              className="flex-row items-center bg-[#1e1e1e] p-4 mb-3 rounded-xl border border-gray-800"
+            >
+              <Image
+                source={{
+                  uri: item.photoURL || 'https://www.gravatar.com/avatar/?d=mp&s=50',
+                }}
+                className="w-12 h-12 rounded-full mr-4"
+              />
+              <Text className="text-white text-lg">{item.displayName}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
+
+      {selectedFriend && (
+        <FriendProfilePopup
+          visible={profileVisible}
+          onClose={() => setProfileVisible(false)}
+          friend={selectedFriend}
+          onRemoveFriend={handleRemoveFriend}
+
+        />
+      )}
+    </SafeAreaView>
+  );
+};
+

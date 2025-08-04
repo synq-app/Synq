@@ -31,6 +31,7 @@ import { ChatScreen } from '../screens/Chat';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import StepThree from '../screens/FirstTimeUser/StepThree';
 import { AllChatsScreen } from '../screens/AllChats';
+import EditMemoScreen from '../screens/EditMemoScreen';
 
 const ReturningUserStack = createNativeStackNavigator();
 export function ReturningUserStackNavigator() {
@@ -47,14 +48,14 @@ export function ReturningUserStackNavigator() {
       <ReturningUserStack.Screen name="Notifications" component={Notifications} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="Settings" component={Settings} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="Explore" component={Explore} options={{ headerShown: false }} />
-      <ReturningUserStack.Screen name="Add Friends" component={AddFriendsScreen} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="AddFriends" component={AddFriendsScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="Network" component={NetworkScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="AvailableFriends" component={AvailableFriends} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="AllFriends" component={FriendsScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="StepThree" component={StepThree} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="Chats" component={ChatStackNavigator} options={{ headerShown: false }} />
-            <ReturningUserStack.Screen name="AllChats" component={AllChatsScreen} options={{ headerShown: false }} />
-
+      <ReturningUserStack.Screen name="AllChats" component={AllChatsScreen} options={{ headerShown: false }} />
+      <ReturningUserStack.Screen name="EditMemoScreen" component={EditMemoScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="GettingStarted" component={GettingStarted} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="SynqActivated" component={SynqActivated} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
@@ -75,16 +76,16 @@ function BottomTabNavigator() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Friends"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].accent,
         headerShown: false,
       }}>
-      <BottomTab.Screen
+      {/* <BottomTab.Screen
         name="Home"
         component={HomeScreen}
         options={({ navigation }) => ({
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="address-book" color={color} />,
           headerRight: () => (
             <Pressable
               onPress={() => navigation.navigate('Modal')}
@@ -100,8 +101,8 @@ function BottomTabNavigator() {
             </Pressable>
           ),
         })}
-      />
-        <BottomTab.Screen
+      /> */}
+      <BottomTab.Screen
         name="Friends"
         component={FriendsScreen}
         options={{
@@ -128,7 +129,7 @@ function BottomTabNavigator() {
       //   <TabBarIcon name="code" color={color} />,
       // }}
       />
-
+      {/* 
       <BottomTab.Screen
         name="Chats"
         component={ChatStackNavigator}
@@ -136,7 +137,7 @@ function BottomTabNavigator() {
           headerTitle: "",
           tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
         }}
-      />
+      /> */}
       <BottomTab.Screen
         name="Me"
         component={ProfileNavigator}

@@ -52,9 +52,10 @@ export const AvailableFriends = ({ navigation }: AuthProps) => {
 
             if (friendProfileSnap.exists()) {
               const profileData = friendProfileSnap.data();
-              const isAvailable = profileData?.isAvailable === true;
+              const isAvailable = profileData?.status === 'available';
 
               if (isAvailable) {
+                console.log('Available friends found:', profileData);
                 return {
                   id: friendId,
                   displayName: profileData.displayName || 'Unnamed Friend',

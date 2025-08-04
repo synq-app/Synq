@@ -5,12 +5,13 @@ import { useRoute, RouteProp } from '@react-navigation/native';
 import { updateProfile } from 'firebase/auth';
 import axios from 'axios';
 import { auth } from './firebaseConfig';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
 type StepTwoRouteParams = {
   StepTwo: {
     user: any;
-    idToken: string; 
-    localId: string; 
+    idToken: string;
+    localId: string;
   };
 };
 
@@ -19,36 +20,64 @@ interface StepTwoProps {
 }
 
 export function StepTwoScreen({ navigation }: StepTwoProps) {
-  const [firstName, setFirstName] = React.useState<string>('');
-  const [lastName, setLastName] = React.useState<string>('');
-  const route = useRoute<RouteProp<StepTwoRouteParams, 'StepTwo'>>(); 
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
+  const route = useRoute<RouteProp<StepTwoRouteParams, 'StepTwo'>>();
+  const { user, idToken, localId } = route.params || {};
+  const db = getFirestore();
 
- const { user, idToken, localId } = route.params || {};  
+  function formatPhoneNumber(phoneNumber: string): string {
+    if (phoneNumber.startsWith('+1') && phoneNumber.length === 12) {
+      const areaCode = phoneNumber.slice(2, 5);
+      const centralOffice = phoneNumber.slice(5, 8);
+      const lineNumber = phoneNumber.slice(8);
+      return `${areaCode}-${centralOffice}-${lineNumber}`;
+    }
+    return phoneNumber;
+  }
 
   const handleGetStarted = async () => {
     const fullName = firstName + (lastName ? ` ${lastName}` : '');
 
     try {
-      if (auth.currentUser && firstName.trim() !== '') {
+      if (!auth.currentUser) {
+        throw new Error('User not authenticated');
+      }
+
+      // Update Firebase Auth profile
+      if (firstName.trim() !== '') {
         await updateProfile(auth.currentUser, { displayName: fullName });
       }
 
+      const formattedPhone = user.phoneNumber
+        ? formatPhoneNumber(user.phoneNumber)
+        : '151-151-1120'; // change this
+      const email = user.email ? user.email : `${user.uid}@synq.com`;
+      const username = `${firstName}${lastName || 'user'}`;
+
       const userData = {
-        email: user.email ? user.email : '',
-        phoneNumber: user.phoneNumber ? user.phoneNumber : '111-111-1112',
+        email,
+        phoneNumber: formattedPhone,
         id: localId,
-        username: `${firstName}${lastName || 'user'}`,
+        username,
         firstName,
-        lastName
+        lastName,
+        displayName: fullName,
       };
 
-      const synqApiUrl = `https://synq.azurewebsites.net/api/users/${localId}`;
+      // Save to Firestore
+      await setDoc(doc(db, 'users', auth.currentUser.uid), userData, {
+        merge: true,
+      });
 
+      // Also send to your backend
+      const synqApiUrl = `https://synq.azurewebsites.net/api/users/${localId}`;
       await axios.put(synqApiUrl, userData, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
       });
+
       navigation.navigate('StepThree');
     } catch (error: any) {
       console.error('Error updating profile or syncing with API:', error.message);
