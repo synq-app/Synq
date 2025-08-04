@@ -131,6 +131,7 @@ export const ChatModal = ({
           id: item.friendId,
           displayName: item.friendName,
           photoURL: item.friendPhotoURL,
+          chatId: item.chatId
         })
       }
       className="flex-row items-center px-4 py-3 border-b border-gray-700"

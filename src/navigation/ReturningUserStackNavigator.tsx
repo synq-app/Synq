@@ -27,11 +27,11 @@ import { ProfileNavigator } from './ProfileNavigator';
 import { AvailableFriends } from '../screens/AvailableFriends';
 import { GettingStarted } from '../screens/GettingStarted';
 import { SynqActivated } from '../screens/SynqActivated';
-import { ChatScreen } from '../screens/Chat';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import StepThree from '../screens/FirstTimeUser/StepThree';
 import { AllChatsScreen } from '../screens/AllChats';
 import EditMemoScreen from '../screens/EditMemoScreen';
+import FullChatScreen from '../screens/FullChatScreen';
 
 const ReturningUserStack = createNativeStackNavigator();
 export function ReturningUserStackNavigator() {
@@ -57,6 +57,8 @@ export function ReturningUserStackNavigator() {
       <ReturningUserStack.Screen name="AllChats" component={AllChatsScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="EditMemoScreen" component={EditMemoScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="GettingStarted" component={GettingStarted} options={{ headerShown: false }} />
+            <ReturningUserStack.Screen name="FullChatScreen" component={FullChatScreen} options={{ headerShown: false }} />
+
       <ReturningUserStack.Screen name="SynqActivated" component={SynqActivated} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <ReturningUserStack.Group screenOptions={{ presentation: 'modal' }}>

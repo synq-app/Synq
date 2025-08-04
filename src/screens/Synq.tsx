@@ -37,8 +37,12 @@ export const SynqScreen = ({ navigation }: any) => {
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
 
   const [chatPopupVisible, setChatPopupVisible] = useState(false);
-  const [currentChatFriend, setCurrentChatFriend] = useState<any>(null);
-
+const [currentChatFriend, setCurrentChatFriend] = useState<{
+  id: string;
+  displayName: string;
+  photoURL?: string;
+  chatId: string;
+} | null>(null);
   const [allChatsVisible, setAllChatsVisible] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
@@ -166,7 +170,6 @@ export const SynqScreen = ({ navigation }: any) => {
     };
     checkUserStatus();
   }, []);
-
   if (isUserAvailable) {
     return (
       <View className="flex-1 bg-black pt-4">
@@ -260,10 +263,16 @@ export const SynqScreen = ({ navigation }: any) => {
           visible={allChatsVisible}
           onClose={() => setAllChatsVisible(false)}
           onOpenChat={(friend: any) => {
-            setCurrentChatFriend(friend);
-            setChatPopupVisible(true);
+            setAllChatsVisible(false); // hide modal
+            navigation.navigate('FullChatScreen', {
+              chatId: friend.chatId,
+              friendId: friend.id,
+              friendName: friend.displayName,
+              photoURL: friend.photoURL
+            });
           }}
         />
+
       </View>
     );
   }
