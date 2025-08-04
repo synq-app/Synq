@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
   Modal,
-  View,
-  Text,
   FlatList,
   TouchableOpacity,
   Image,
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import { Text, View } from '../components/Themed';
 import { getAuth } from 'firebase/auth';
 import {
   getFirestore,
@@ -58,63 +57,58 @@ export const ChatModal = ({
       where('participants', 'array-contains', currentUser.uid)
     );
 
-    const unsubscribe = onSnapshot(
-      chatsQuery,
-      async (querySnapshot) => {
-        const chatsData: typeof chatList = [];
+    const unsubscribe = onSnapshot(chatsQuery, async (querySnapshot) => {
+      const chatsData: typeof chatList = [];
 
-        await Promise.all(
-          querySnapshot.docs.map(async (chatDoc) => {
-            const chatId = chatDoc.id;
-            const data = chatDoc.data();
+      await Promise.all(
+        querySnapshot.docs.map(async (chatDoc) => {
+          const chatId = chatDoc.id;
+          const data = chatDoc.data();
 
-            if (!data.participants || !Array.isArray(data.participants)) {
-              return;
-            }
+          if (!Array.isArray(data.participants)) return;
 
-            const friendId = data.participants.find(
-              (uid: string) => uid !== currentUser.uid
-            );
-            if (!friendId) return;
+          const friendId = data.participants.find(
+            (uid: string) => uid !== currentUser.uid
+          );
+          if (!friendId) return;
 
-            const friendDoc = await getDoc(doc(db, 'users', friendId));
-            const friendData = friendDoc.exists() ? friendDoc.data() : null;
-            const messagesRef = collection(db, 'chats', chatId, 'messages');
-            const lastMessageQuery = query(
-              messagesRef,
-              orderBy('createdAt', 'desc'),
-              limit(1)
-            );
-            const lastMessageSnap = await getDocs(lastMessageQuery);
-            const lastMessageDoc = lastMessageSnap.docs[0];
-            const lastMessageData = lastMessageDoc?.data();
+          const friendDoc = await getDoc(doc(db, 'users', friendId));
+          const friendData = friendDoc.exists() ? friendDoc.data() : null;
 
-            chatsData.push({
-              chatId,
-              friendId,
-              friendName: friendData?.displayName || 'Unnamed',
-              friendPhotoURL: friendData?.photoURL || friendData?.imageUrl || friendData?.imageurl,
-              lastMessage: lastMessageData?.text || '',
-              lastMessageTime:
-                lastMessageData?.createdAt?.toDate?.() || null,
-            });
-          })
-        );
+          const messagesRef = collection(db, 'chats', chatId, 'messages');
+          const lastMessageQuery = query(
+            messagesRef,
+            orderBy('createdAt', 'desc'),
+            limit(1)
+          );
+          const lastMessageSnap = await getDocs(lastMessageQuery);
+          const lastMessageDoc = lastMessageSnap.docs[0];
+          const lastMessageData = lastMessageDoc?.data();
 
-        chatsData.sort((a, b) => {
-          if (!a.lastMessageTime) return 1;
-          if (!b.lastMessageTime) return -1;
-          return b.lastMessageTime.getTime() - a.lastMessageTime.getTime();
-        });
+          chatsData.push({
+            chatId,
+            friendId,
+            friendName: friendData?.displayName || 'Unnamed',
+            friendPhotoURL:
+              friendData?.photoURL ||
+              friendData?.imageUrl ||
+              friendData?.imageurl,
+            lastMessage: lastMessageData?.text || '',
+            lastMessageTime:
+              lastMessageData?.createdAt?.toDate?.() || null,
+          });
+        })
+      );
 
-        setChatList(chatsData);
-        setLoading(false);
-      },
-      (error) => {
-        console.error('Error fetching chats:', error);
-        setLoading(false);
-      }
-    );
+      chatsData.sort((a, b) => {
+        if (!a.lastMessageTime) return 1;
+        if (!b.lastMessageTime) return -1;
+        return b.lastMessageTime.getTime() - a.lastMessageTime.getTime();
+      });
+
+      setChatList(chatsData);
+      setLoading(false);
+    });
 
     return () => unsubscribe();
   }, [visible]);
@@ -132,35 +126,26 @@ export const ChatModal = ({
     };
   }) => (
     <TouchableOpacity
-      onPress={() => {
+      onPress={() =>
         onOpenChat({
           id: item.friendId,
           displayName: item.friendName,
           photoURL: item.friendPhotoURL,
-        });
-      }}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderBottomColor: '#444',
-        borderBottomWidth: 1,
-      }}
+        })
+      }
+      className="flex-row items-center px-4 py-3 border-b border-gray-700"
     >
       <Image
         source={{
-          uri: item.friendPhotoURL || 'https://www.gravatar.com/avatar/?d=mp&s=50',
+          uri:
+            item.friendPhotoURL ||
+            'https://www.gravatar.com/avatar/?d=mp&s=50',
         }}
-        style={{ width: 48, height: 48, borderRadius: 24, marginRight: 12 }}
+        className="w-12 h-12 rounded-full mr-3"
       />
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: 'white', fontSize: 18 }}>{item.friendName}</Text>
-        <Text
-          style={{ color: '#AAA', fontSize: 14 }}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
+      <View className="flex-1">
+        <Text className="text-white text-lg">{item.friendName}</Text>
+        <Text className="text-gray-400 text-sm" numberOfLines={1}>
           {item.lastMessage || 'No messages yet'}
         </Text>
       </View>
@@ -170,48 +155,20 @@ export const ChatModal = ({
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
       <View
-        style={{
-          flex: 1,
-          backgroundColor: '#121212',
-          paddingTop: Platform.OS === 'ios' ? 60 : 40,
-          paddingHorizontal: 0,
-          position: 'relative',
-        }}
+        className={`flex-1 bg-[#121212] ${
+          Platform.OS === 'ios' ? 'pt-16' : 'pt-10'
+        } relative`}
       >
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 16,
-            paddingBottom: 12,
-            borderBottomWidth: 1,
-            borderBottomColor: '#333',
-          }}
-        >
-          <Text
-            style={{
-              color: 'white',
-              fontSize: 22,
-              fontWeight: '600',
-              flex: 1,
-              textAlign: 'center',
-            }}
-          >
+        <View className="flex-row items-center justify-center border-b border-gray-800 px-4 pb-3 relative">
+          <Text className="text-white text-xl font-semibold text-center">
             Your Chats
           </Text>
-
           <TouchableOpacity
             onPress={onClose}
-            style={{
-              position: 'absolute',
-              right: 16,
-              padding: 8,
-              zIndex: 10,
-            }}
+            className="absolute right-4 top-0 bottom-0 justify-center"
             accessibilityLabel="Close chats"
           >
-            <Text style={{ color: 'white', fontSize: 28, lineHeight: 28 }}>×</Text>
+            <Text className="text-white text-3xl">×</Text>
           </TouchableOpacity>
         </View>
 
@@ -219,10 +176,10 @@ export const ChatModal = ({
           <ActivityIndicator
             size="large"
             color="#1DB954"
-            style={{ marginTop: 40 }}
+            className="mt-10"
           />
         ) : chatList.length === 0 ? (
-          <Text style={{ color: 'white', textAlign: 'center', marginTop: 40 }}>
+          <Text className="text-white text-center mt-10">
             You have no chats yet
           </Text>
         ) : (
@@ -231,25 +188,9 @@ export const ChatModal = ({
             keyExtractor={(item) => item.chatId}
             renderItem={renderChatItem}
             contentContainerStyle={{ paddingBottom: 100 }}
-            style={{ flex: 1 }}
+            className="flex-1"
           />
         )}
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: '#121212',
-            paddingVertical: 16,
-            paddingHorizontal: 24,
-            borderTopWidth: 1,
-            borderTopColor: '#333',
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-          }}
-        >
-        </View>
       </View>
     </Modal>
   );

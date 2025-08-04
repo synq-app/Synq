@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import {
-  View,
   TextInput,
-  Button,
-  Text,
   Alert,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Button,
 } from 'react-native';
+import { View, Text } from '../components/Themed';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
@@ -33,35 +32,30 @@ const EditMemoScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+    <SafeAreaView className="flex-1 bg-black">
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={{ flex: 1, padding: 20, justifyContent: 'center' }}>
-            <Text className="text-white mb-20 text-2xl text-center">
+          <View className="flex-1 justify-center p-5">
+            <Text className="text-white mb-20 text-2xl text-center font-semibold">
               Edit your Synq memo
             </Text>
 
             <TextInput
               value={memo}
               onChangeText={setMemo}
-              className="text-white mb-20"
-              style={{
-                backgroundColor: '#222',
-                padding: 16,
-                borderRadius: 12,
-                fontSize: 16,
-                minHeight: 120,
-                textAlignVertical: 'top'
-              }}
               multiline
               numberOfLines={5}
+              className="text-white bg-[#222] rounded-xl p-4 text-base min-h-[120px] mb-20"
               placeholder="I'm free if anyone wants to grab coffee..."
               placeholderTextColor="#888"
             />
-            <Button title="Update note" onPress={handleSave} color="#1DB954" />
+
+            <View className="rounded-lg overflow-hidden">
+              <Button title="Update note" onPress={handleSave} color="#1DB954" />
+            </View>
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
