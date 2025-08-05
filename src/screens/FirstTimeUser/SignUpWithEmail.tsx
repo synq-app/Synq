@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { auth, createUserWithEmailAndPassword } from "./firebaseConfig";
 import { View, Text, TouchableOpacity, Alert, TextInput, TouchableWithoutFeedback, Keyboard } from "react-native";
-import { Button } from "../../components/Themed";
+import { SynqButton } from "../../components/Themed";
 import axios from 'axios';
 import { ENV_VARS } from "../../../config";
 
@@ -40,7 +40,7 @@ export const SignUpWithEmail = ({ navigation }: AuthProps) => {
                     returnSecureToken: true
                 }
             );
-            
+
             const { idToken, localId } = response.data;
             navigation.navigate("StepTwo", { user: userCredential.user, idToken, localId });
 
@@ -77,7 +77,7 @@ export const SignUpWithEmail = ({ navigation }: AuthProps) => {
                         className="text-white ml-7 mt-5 w-80 py-3 px-4 bg-gray-800 rounded"
                     />
                     <TouchableOpacity onPress={handleEmailSignUp} className="mt-14">
-                        <Button text="Create Account" onPress={handleEmailSignUp} className="bg-[#7DFFA6]" />
+                        <SynqButton text="Create Account" onPress={handleEmailSignUp} className="bg-[#7DFFA6]" />
                     </TouchableOpacity>
                 </View>
             </View>

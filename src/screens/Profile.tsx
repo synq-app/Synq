@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Text, View } from '../components/Themed';
+import { SynqButton, SynqText, View } from '../components/Themed';
 import { Image, TouchableOpacity, Modal, Alert, ScrollView, TextInput } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, getDocs, collection, onSnapshot } from "firebase/firestore";
@@ -155,7 +155,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       const uploadTask = uploadBytesResumable(storageRef, blob);
 
       uploadTask.on('state_changed',
-        () => {}, // Optional: progress tracking
+        () => { }, // Optional: progress tracking
         (error) => {
           alert("Error uploading image to Firebase: " + error.message);
           setIsUploading(false);
@@ -182,41 +182,41 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       setIsUploading(false);
     }
   };
-const convertToPNG = async (uri: string): Promise<string> => {
-  const result = await ImageManipulator.manipulateAsync(
-    uri,
-    [], // no resize or crop, just format conversion
-    { format: ImageManipulator.SaveFormat.PNG }
-  );
-  return result.uri;
-};
-const uploadProfileImageToBackend = async (userId: string, uri: string) => {
-  try {
-    // Convert image to PNG
-    const pngUri = await convertToPNG(uri);
+  const convertToPNG = async (uri: string): Promise<string> => {
+    const result = await ImageManipulator.manipulateAsync(
+      uri,
+      [], // no resize or crop, just format conversion
+      { format: ImageManipulator.SaveFormat.PNG }
+    );
+    return result.uri;
+  };
+  const uploadProfileImageToBackend = async (userId: string, uri: string) => {
+    try {
+      // Convert image to PNG
+      const pngUri = await convertToPNG(uri);
 
-    const responseFetch = await fetch(pngUri);
-    const blob = await responseFetch.blob();
+      const responseFetch = await fetch(pngUri);
+      const blob = await responseFetch.blob();
 
-    const contentType = 'image/png'; // force png
+      const contentType = 'image/png'; // force png
 
-    const response = await fetch(`https://synqapp.com/api/users/${userId}/images/profileImage`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': contentType,
-      },
-      body: blob,
-    });
+      const response = await fetch(`https://synqapp.com/api/users/${userId}/images/profileImage`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': contentType,
+        },
+        body: blob,
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+    } catch (error: any) {
+      console.error('❌ Failed to upload profile image to backend:', error.message);
+      // Alert.alert('Error', 'Could not sync profile image with server.');
     }
-    const data = await response.json();
-  } catch (error: any) {
-    console.error('❌ Failed to upload profile image to backend:', error.message);
-    // Alert.alert('Error', 'Could not sync profile image with server.');
-  }
-};
+  };
 
 
 
@@ -286,7 +286,7 @@ const uploadProfileImageToBackend = async (userId: string, uri: string) => {
   }, []);
 
   return (
-    <ScrollView className="bg-black" style={{ flex: 1 }}>
+    <ScrollView className="bg-primary-background" style={{ flex: 1 }}>
       <View className="flex flex-row justify-between p-4 mt-16 mb-[-10px] bg-black">
         <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
           <Icon name="notifications-outline" size={26} color="#7DFFA6" />
@@ -326,10 +326,10 @@ const uploadProfileImageToBackend = async (userId: string, uri: string) => {
             <Icon name="qr-code-outline" size={24} color="#000" />
           </TouchableOpacity>
         </View>
-        <Text className="text-2xl mt-5 font-medium text-[#7DFFA6]">{auth.currentUser?.displayName}</Text>
-        <Text className="text-sm ml-4 mt-2">{city}, {state}</Text>
+        <SynqText className="text-2xl mt-5 font-medium text-accent">{auth.currentUser?.displayName}</SynqText>
+        <SynqText className="text-sm ml-4 mt-2">{city}, {state}</SynqText>
         <View>
-          <Text>{memo || ""}</Text>
+          <SynqText>{memo || ""}</SynqText>
         </View>
       </View>
       <Modal visible={isQRExpanded} transparent animationType="fade">
@@ -352,7 +352,7 @@ const uploadProfileImageToBackend = async (userId: string, uri: string) => {
         </TouchableOpacity>
       </Modal>
       <View className="bg-black">
-        <Text className="text-lg font-medium ml-4 text-white mb-2">Top Synqs</Text>
+        <SynqText className="text-lg font-medium ml-4 text-primary-text mb-2">Top Synqs</SynqText>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-4">
           {connections.length > 0 ? (
             connections.map((connection, index) => (
@@ -361,16 +361,16 @@ const uploadProfileImageToBackend = async (userId: string, uri: string) => {
                   source={{ uri: connection.imageUrl }}
                   className="w-16 h-16 rounded-full bg-white"
                 />
-                <Text className="text-white text-xs mt-2 text-center" numberOfLines={1}>
+                <SynqText className="text-primary-text text-xs mt-2 text-center" numberOfLines={1}>
                   {connection.name}
-                </Text>
+                </SynqText>
               </View>
             ))
           ) : (
-            <Text className="text-white ml-4">No connections found.</Text>
+            <SynqText className="text-primary-text ml-4">No connections found.</SynqText>
           )}
         </ScrollView>
-        <Text className="text-lg font-medium ml-4 text-white mt-6">Top Activities</Text>
+        <SynqText className="text-lg font-medium ml-4 text-primary-text mt-6">Top Activities</SynqText>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-4">
           {interests.map((interest) => (
             <View key={interest} className="items-center mr-6">
@@ -380,14 +380,14 @@ const uploadProfileImageToBackend = async (userId: string, uri: string) => {
                 }}
                 className="w-16 h-16 rounded-full bg-white"
               />
-              <Text className="text-white text-xs mt-2 text-center">{interest}</Text>
+              <SynqText className="text-primary-text text-xs mt-2 text-center">{interest}</SynqText>
             </View>
           ))}
           <TouchableOpacity onPress={() => setShowInputModal(true)} className="items-center mr-4">
             <View className="w-16 h-16 rounded-full border-2 border-green-400 bg-black justify-center items-center">
-              <Text className="text-green-400 text-3xl">+</Text>
+              <SynqText className="text-green-400 text-3xl">+</SynqText>
             </View>
-            <Text className="text-white text-xs mt-2 text-center">Add</Text>
+            <SynqText className="text-white text-xs mt-2 text-center">Add</SynqText>
           </TouchableOpacity>
         </ScrollView>
 
@@ -408,7 +408,7 @@ const uploadProfileImageToBackend = async (userId: string, uri: string) => {
               }}
             />
             <View className="bg-black p-6 rounded-lg w-80 border border-gray-700">
-              <Text className="text-white text-lg mb-4">What's your favorite social activity?</Text>
+              <SynqText className="text-white text-lg mb-4">What's your favorite social activity?</SynqText>
               <TextInput
                 className="h-10 w-full bg-gray-800 text-white rounded-full pl-4 pb-2 text-base"
                 placeholder="Enter your interest"
@@ -421,10 +421,10 @@ const uploadProfileImageToBackend = async (userId: string, uri: string) => {
                   onPress={() => setShowInputModal(false)}
                   className="bg-gray-700 px-5 py-2 rounded-full"
                 >
-                  <Text className="text-white">Cancel</Text>
+                  <SynqText className="text-white">Cancel</SynqText>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={addInterest} className="bg-[#7DFFA6] px-5 py-2 rounded-full">
-                  <Text className="text-black">Add</Text>
+                  <SynqText className="text-black">Add</SynqText>
                 </TouchableOpacity>
               </View>
             </View>
@@ -432,7 +432,7 @@ const uploadProfileImageToBackend = async (userId: string, uri: string) => {
         </Modal>
       </View>
       <TouchableOpacity onPress={signOut} className="bg-black w-32 h-8 rounded-lg self-center mt-10 mb-10 border border-white">
-        <Text className="text-white text-center text-lg">Sign Out</Text>
+        <SynqText className="text-white text-center text-lg">Sign Out</SynqText>
       </TouchableOpacity>
     </ScrollView>
   );

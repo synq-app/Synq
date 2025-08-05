@@ -1,6 +1,6 @@
 import { FlatList, ListRenderItemInfo, TouchableOpacity } from 'react-native';
 import { User, UserRow } from '../components/UserRow';
-import { Button, Text, View } from '../components/Themed';
+import { SynqButton, Text, View } from '../components/Themed';
 import * as React from 'react';
 import { mockUsers } from '../constants/Mocks';
 
@@ -45,9 +45,9 @@ export default function AddFriendsScreen({ navigation }: any) {
         <Text className="text-white text-2xl text-center flex-1 mt-2">Add Connections</Text>
       </View>
       <View className="w-5/6 h-full">
-            <TouchableOpacity onPress={navigateToNetworkTab} className="mt-4 p-2">
-        <Text className="text-blue-500 text-lg">Add from Contacts</Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={navigateToNetworkTab} className="mt-4 p-2">
+          <Text className="text-blue-500 text-lg">Add from Contacts</Text>
+        </TouchableOpacity>
         <Text className="text-xl mt-8 mb-4">Suggested</Text>
         <View className="w-full border-b-2 border-solid border-synq-accent-light dark:border-synq-accent-dark" />
         <FlatList
@@ -57,9 +57,9 @@ export default function AddFriendsScreen({ navigation }: any) {
           renderItem={renderRow}
         />
         {selected.length > 0 ? (
-          <Button text="Add" className="mb-20" onPress={sendInvites} />
+          <SynqButton text="Add" className="mb-20" onPress={sendInvites} />
         ) : (
-          invited.length > 0 && <Button text="Continue" className="mb-20" onPress={() => { }} />
+          invited.length > 0 && <SynqButton text="Continue" className="mb-20" onPress={() => { }} />
         )}
       </View>
 
