@@ -1,4 +1,4 @@
-import { Button, Text, View } from '../../components/Themed';
+import { SynqButton, Text, View } from '../../components/Themed';
 import { Image, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 
@@ -21,26 +21,26 @@ export default function WelcomeScreen({ navigation }: any) {
           resizeMode="contain"
         />
       </View>
-      
+
       <View className="items-center mb-8 space-y-0">
         {!isSignInClicked && !isSignUpClicked && (
-          <Button
+          <SynqButton
             text="Create account"
-            onPress={() => setIsSignUpClicked(true)} 
+            onPress={() => setIsSignUpClicked(true)}
             style={{ backgroundColor: '#7DFFA6' }}
           />
         )}
 
         {isSignUpClicked && (
           <>
-            <Button
+            <SynqButton
               text="Sign up with Email"
               onPress={() => navigation.navigate('SignUpWithEmail')}
               style={{ backgroundColor: '#7DFFA6' }}
             />
-            <Button
+            <SynqButton
               text="Sign up with Phone Number"
-              onPress={() => navigation.navigate('SignUpWithPhoneNumber')} 
+              onPress={() => navigation.navigate('SignUpWithPhoneNumber')}
               style={{ backgroundColor: '#7DFFA6' }}
             />
             <TouchableOpacity
@@ -57,21 +57,21 @@ export default function WelcomeScreen({ navigation }: any) {
         )}
 
         {!isSignUpClicked && !isSignInClicked && (
-          <Button
+          <SynqButton
             text="Sign in"
-            onPress={() => setIsSignInClicked(true)} 
+            onPress={() => setIsSignInClicked(true)}
             style={{ backgroundColor: '#7DFFA6' }}
           />
         )}
 
         {isSignInClicked && (
           <>
-            <Button
+            <SynqButton
               text="Sign in with Email"
               onPress={() => navigation.navigate('SignInWithEmail')}
               style={{ backgroundColor: '#7DFFA6' }}
             />
-            <Button
+            <SynqButton
               text="Sign in with Phone Number"
               onPress={() => navigation.navigate('SignInWithPhoneNumber')}
               style={{ backgroundColor: '#7DFFA6' }}
@@ -82,7 +82,7 @@ export default function WelcomeScreen({ navigation }: any) {
                 borderWidth: 1,
                 borderRadius: 5
               }}
-              onPress={() => setIsSignInClicked(false)} 
+              onPress={() => setIsSignInClicked(false)}
             >
               <Text style={{ color: 'white' }}>Back</Text>
             </TouchableOpacity>

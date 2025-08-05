@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Text, View, TextInput } from 'react-native';
-import { Button } from '../../components/Themed';
+import { SynqButton } from '../../components/Themed';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { updateProfile } from 'firebase/auth';
 import axios from 'axios';
@@ -101,7 +101,7 @@ export function StepTwoScreen({ navigation }: StepTwoProps) {
           className="mt-5 ml-7 w-3/4 py-3 px-4 bg-gray-800 rounded border-b-4 border-synq-accent-light text-white"
         />
       </View>
-      <Button text="Get Started" className="bg-[#7DFFA6]" onPress={handleGetStarted} />
+      <SynqButton text="Get Started" className="bg-[#7DFFA6]" onPress={handleGetStarted} />
     </View>
   );
 }

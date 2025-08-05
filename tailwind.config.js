@@ -5,20 +5,61 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'synq-accent': {
-          light: "#7DFFA6",
-          dark: "#7DFFA6"
-        },
-        'synq-background': {
-          light: "#FDFDFD",
-          dark: "#050606",
-        },
-        'synq-text': {
-          light: "#000",
-          dark: "#fff",
-        }
-      }
+        'accent': "#6DFE95",
+        'primary-background': "#000000",
+        'primary-text': "#ffffff",
+        'inverted-text': "#000000",
+        'placeholder-text': "#9ca3af",
+      },
     }
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.text-label': {
+          'color': "#ffffff",
+          'font-size': '14px',
+          'line-height': '20px',
+          'font-weight': '500',
+          'font-family': 'Avenir',
+        },
+        '.text-body': {
+          'color': "#ffffff",
+          'font-size': '14px',
+          'line-height': '20px',
+          'font-weight': '400',
+          'font-family': 'Avenir',
+        },
+        '.text-heading': {
+          'color': "#ffffff",
+          'font-size': '20px',
+          'line-height': '28px',
+          'font-weight': '500',
+          'font-family': 'Avenir',
+        },
+        '.text-title': {
+          'color': "#ffffff",
+          'font-size': '20px',
+          'line-height': '28px',
+          'font-weight': '500',
+          'font-family': 'Avenir',
+        },
+        '.text-caption': {
+          'color': "#9ca3af",
+          'font-size': '12px',
+          'line-height': '16px',
+          'font-weight': '400',
+          'font-family': 'Avenir',
+        },
+        '.text-button': {
+          'color': "#ffffff",
+          'font-size': '16px',
+          'line-height': '20px',
+          'font-weight': '600',
+          'font-family': 'Avenir',
+        },
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 }

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, Switch, SafeAreaView, Image } from 'react-native';
-import { Text, View } from '../components/Themed';
-import Colors from '../constants/Colors';
+import { SynqText, View } from '../components/Themed';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
@@ -35,11 +34,11 @@ export const Settings = ({ navigation }: any) => {
                 <View className="absolute h-2/5 w-screen top-0 bg-green-400 rounded-b-xl" />
                 <View className="absolute top-0 gap-6 p-8 flex-row bg-transparent">
                     <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Text className='text-black text-2xl'>
+                        <SynqText className='text-black text-2xl'>
                             {"<"}
-                        </Text>
+                        </SynqText>
                     </TouchableOpacity>
-                    <Text className='text-black text-2xl'>Preferences</Text>
+                    <SynqText className='text-black text-2xl'>Preferences</SynqText>
                 </View>
                 <View className="flex bg-gray-900 pr-8 pb-8 rounded-t-xl gap-8">
                     <View className="flex-row items-center gap-1 bg-transparent">
@@ -49,19 +48,19 @@ export const Settings = ({ navigation }: any) => {
                                 className="w-10 h-10 rounded-full"
                             />
                         ) : null}
-                        <Text className="text-white text-xl">{auth.currentUser?.displayName}</Text>
+                        <SynqText className="text-white text-xl">{auth.currentUser?.displayName}</SynqText>
                     </View>
-                    <Text className='text-gray-400'>Account Settings</Text>
+                    <SynqText className='text-gray-400'>Account Settings</SynqText>
                     <TouchableOpacity>
-                        <Text>Edit Profile</Text>
+                        <SynqText>Edit Profile</SynqText>
                     </TouchableOpacity>
                     <TouchableOpacity>
-                        <Text>Change Password</Text>
+                        <SynqText>Change Password</SynqText>
                     </TouchableOpacity>
                     <View className="flex-row justify-between items-center bg-transparent">
-                        <Text>Push Notifications</Text>
+                        <SynqText>Push Notifications</SynqText>
                         <Switch
-                            trackColor={{ false: "#767577", true: Colors.dark.accent }}
+                            trackColor={{ false: "#767577", true: "accent" }}
                             thumbColor={notificationsEnabled ? 'white' : "#f4f3f4"}
                             ios_backgroundColor="#3e3e3e"
                             onValueChange={toggleSwitch}
@@ -69,18 +68,18 @@ export const Settings = ({ navigation }: any) => {
                         />
                     </View>
                     <View className="border-b-2 border-b-gray-400" />
-                    <Text className='text-gray-400'>More</Text>
+                    <SynqText className='text-gray-400'>More</SynqText>
                     <TouchableOpacity>
-                        <Text>About Us</Text>
+                        <SynqText>About Us</SynqText>
                     </TouchableOpacity>
                     <TouchableOpacity>
-                        <Text>Privacy Policy</Text>
+                        <SynqText>Privacy Policy</SynqText>
                     </TouchableOpacity>
                     <TouchableOpacity>
-                        <Text>Terms and Conditions</Text>
+                        <SynqText>Terms and Conditions</SynqText>
                     </TouchableOpacity>
                     <TouchableOpacity>
-                        <Text>Feedback</Text>
+                        <SynqText>Feedback</SynqText>
                     </TouchableOpacity>
                 </View>
             </View>

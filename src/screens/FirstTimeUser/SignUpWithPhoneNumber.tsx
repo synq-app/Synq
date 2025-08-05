@@ -13,7 +13,7 @@ import {
   signInWithPhoneNumber,
   app
 } from './firebaseConfig';
-import { Button } from '../../components/Themed';
+import { SynqButton } from '../../components/Themed';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import axios from 'axios';
 import { ENV_VARS } from '../../../config';
@@ -80,15 +80,15 @@ export const SignUpWithPhoneNumber = ({ navigation }: AuthProps) => {
       const userCredential = await confirm.confirm(fullCode);
       const user = userCredential.user;
 
-        const response = await axios.put(
-                ENV_VARS.TOKEN_URL,
-                {
-                    email: user.uid + '@synq.com',
-                    password: user.uid,
-                    returnSecureToken: true
-                }
-            );
-            const { idToken, localId } = response.data;
+      const response = await axios.put(
+        ENV_VARS.TOKEN_URL,
+        {
+          email: user.uid + '@synq.com',
+          password: user.uid,
+          returnSecureToken: true
+        }
+      );
+      const { idToken, localId } = response.data;
 
       navigation.navigate('StepTwo', { user, idToken, localId });
     } catch (error: any) {
@@ -138,7 +138,7 @@ export const SignUpWithPhoneNumber = ({ navigation }: AuthProps) => {
                 data rates may apply.
               </Text>
               <TouchableOpacity onPress={sendVerificationCode} className="mt-10">
-                <Button text="Send Code" onPress={sendVerificationCode} style={{ backgroundColor: '#7DFFA6' }} />
+                <SynqButton text="Send Code" onPress={sendVerificationCode} style={{ backgroundColor: '#7DFFA6' }} />
               </TouchableOpacity>
             </>
           ) : (
@@ -175,7 +175,7 @@ export const SignUpWithPhoneNumber = ({ navigation }: AuthProps) => {
                 Didn’t receive a code? Try again.
               </Text>
               <TouchableOpacity onPress={verifyCode} className="mt-6" style={{ alignSelf: 'center' }}>
-                <Button text="Continue" onPress={verifyCode} className="bg-[#7DFFA6]" />
+                <SynqButton text="Continue" onPress={verifyCode} className="bg-[#7DFFA6]" />
               </TouchableOpacity>
             </>
           )}

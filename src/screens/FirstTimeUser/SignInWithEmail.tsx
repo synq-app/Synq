@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Text, TextInput, TouchableOpacity, Alert, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { Button } from "../../components/Themed";
+import { SynqButton } from "../../components/Themed";
 import { auth } from './firebaseConfig';
 
 const SignInWithEmail = ({ navigation }: any) => {
@@ -43,7 +43,7 @@ const SignInWithEmail = ({ navigation }: any) => {
           className="text-white mt-4 w-full py-2 px-4 bg-gray-800 rounded-md"
         />
         <TouchableOpacity onPress={handleEmailLogin} className="mt-5">
-          <Button text="Sign In" onPress={handleEmailLogin} style={{ backgroundColor: '#7DFFA6' }} />
+          <SynqButton text="Sign In" onPress={handleEmailLogin} style={{ backgroundColor: '#7DFFA6' }} />
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>

@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from "react-native";
-import { Button, ScreenView, Text, View } from "../components/Themed";
+import { SynqButton, ScreenView, SynqText, View } from "../components/Themed";
 import clsx from "clsx";
 import { getAuth } from "firebase/auth";
 import {
@@ -108,18 +108,18 @@ export const FeedScreen = ({ navigation }: any) => {
   return (
     <SafeAreaView className="flex-1 bg-[#121212]">
       <View className="flex-row justify-between items-center p-5">
-        <Text className="text-white text-2xl font-bold">All Friends</Text>
+        <SynqText className="text-white text-2xl font-bold">All Friends</SynqText>
         <TouchableOpacity
           onPress={() => navigation.navigate('AddFriends')}
           className="bg-[#1DB954] px-4 py-2 rounded-full"
         >
-          <Text className="text-white font-bold">Add Friends</Text>
+          <SynqText className="text-white font-bold">Add Friends</SynqText>
         </TouchableOpacity>
       </View>
 
       {friends.length === 0 ? (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-gray-400">You have no friends yet.</Text>
+          <SynqText className="text-gray-400">You have no friends yet.</SynqText>
         </View>
       ) : (
         <FlatList
@@ -137,7 +137,7 @@ export const FeedScreen = ({ navigation }: any) => {
                 }}
                 className="w-12 h-12 rounded-full mr-4"
               />
-              <Text className="text-white text-lg">{item.displayName}</Text>
+              <SynqText className="text-white text-lg">{item.displayName}</SynqText>
             </TouchableOpacity>
           )}
         />

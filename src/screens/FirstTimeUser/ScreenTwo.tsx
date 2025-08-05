@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Animated } from 'react-native';
+import { Animated, View } from 'react-native';
 import { TouchableOpacity } from 'react-native';
 import { SvgXml } from 'react-native-svg';
+import { ScreenView, SynqButton, SynqText } from '../../components/Themed';
 
 const synqSvg = `
   <svg width="390" height="565" viewBox="0 0 390 565" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -15,62 +16,62 @@ const synqSvg = `
 export default function ScreenTwo({ navigation }: any) {
   const [showText, setShowText] = useState(false);
 
-  const fadeAnim = useState(new Animated.Value(0))[0]; 
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowText(true);
       Animated.timing(fadeAnim, {
-        toValue: 1,  
-        duration: 1000, 
+        toValue: 1,
+        duration: 1000,
         useNativeDriver: true,
-      }).start();  
+      }).start();
     }, 1000);
 
     return () => clearTimeout(timer);
   }, [fadeAnim]);
 
   return (
-    <View className="flex-1 justify-center items-center bg-black relative">
+    <ScreenView className='justify-between'>
       <SvgXml
         xml={synqSvg}
         width="390"
         height="565"
         className="absolute top-0"
       />
+      <View className='gap-12 h-2/3 pt-64'>
+        <SynqText>
+          Welcome to SYNQ, a social tool that connects you with available friends for spontaneous time together.
+        </SynqText>
 
-      <Text className="text-white text-center px-5 w-5/6 text-base absolute top-60" style={{ fontFamily: 'avenir' }}>
-        Welcome to SYNQ, a social tool that connects you with available friends for spontaneous time together.
-      </Text>
+        {showText && (
+          <Animated.Text
+            className="text-body text-center"
+            style={{ opacity: fadeAnim }}
+          >
+            When you're free, tap the button to activate, see which friends are available, and make it happen!
+          </Animated.Text>
+        )}
+      </View>
 
-      {showText && (
-        <Animated.Text
-          className="text-white text-center px-5 w-5/6 text-base absolute top-100"
-          style={{
-            fontFamily: 'avenir',
-            opacity: fadeAnim, 
-          }}
-        >
-          When you're free, tap the button to activate, see which friends are available, and make it happen!
-        </Animated.Text>
-      )}
+      <View>
+        {showText && (
+          <View>
+            <SynqButton
+              onPress={() => navigation.navigate('ScreenThree')}
+              text={"Continue"}
+            />
 
-      <TouchableOpacity
-        onPress={() => navigation.navigate('ScreenThree')}
-        className="bg-[#6DFE95] py-3 px-16 rounded-md mt-80 top-20"
-      >
-        <Text className="text-black text-center text-lg" style={{ fontFamily: 'Avenir Bold' }}>Continue</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => navigation.navigate('Welcome')}
-        className="py-3 px-8 mt-20"
-      >
-        <Text className="text-white text-center text-sm mt-5">
-          Already have an account?
-          <Text className="text-[#6DFE95]"> Click here</Text>.
-        </Text>
-      </TouchableOpacity>
-    </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Welcome')}
+              className="pt-4"
+            >
+              <SynqText className='text-label'>Already have an account?</SynqText>
+              <SynqText className="text-label text-accent"> Click here.</SynqText>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    </ScreenView>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Text, TextInput, TouchableOpacity, Alert, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
-import { Button } from "../../components/Themed";
+import { SynqButton } from "../../components/Themed";
 import { signInWithPhoneNumber } from 'firebase/auth';
 import { auth, app } from './firebaseConfig';  // Import your firebase auth configuration
 
@@ -130,7 +130,7 @@ const SignInWithPhoneNumber = ({ navigation }: any) => {
               Synq will send you a text with a verification code. Message and data rates may apply.
             </Text>
             <TouchableOpacity onPress={sendVerificationCode} style={{ marginTop: 60 }}>
-              <Button text="Send Code" onPress={sendVerificationCode} style={{ backgroundColor: '#7DFFA6' }} />
+              <SynqButton text="Send Code" onPress={sendVerificationCode} style={{ backgroundColor: '#7DFFA6' }} />
             </TouchableOpacity>
           </>
         ) : (
