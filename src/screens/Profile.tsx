@@ -9,14 +9,9 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { presetActivities, stateAbbreviations } from '../constants/Mocks';
-import axios from 'axios';
 import * as ImageManipulator from 'expo-image-manipulator';
-import * as FileSystem from 'expo-file-system';
-import * as mime from 'mime';
-
 
 const defaultPic = require('../assets/images/default-profile-pic.jpg');
-
 const db = getFirestore();
 const auth = getAuth();
 
@@ -151,11 +146,10 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       const response = await fetch(uri);
       const blob = await response.blob();
 
-      // Upload to Firebase Storage
       const uploadTask = uploadBytesResumable(storageRef, blob);
 
       uploadTask.on('state_changed',
-        () => { }, // Optional: progress tracking
+        () => { },
         (error) => {
           alert("Error uploading image to Firebase: " + error.message);
           setIsUploading(false);
@@ -165,13 +159,11 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           setImageUrl(downloadURL);
           setIsUploading(false);
 
-          // Save download URL to Firestore
           const userDocRef = doc(db, 'users', auth.currentUser!.uid);
           await updateDoc(userDocRef, {
             imageurl: downloadURL,
           });
 
-          // Upload to backend API sending raw Blob without auth header
           if (auth.currentUser) {
             await uploadProfileImageToBackend(auth.currentUser.uid, uri);
           }
@@ -185,19 +177,16 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const convertToPNG = async (uri: string): Promise<string> => {
     const result = await ImageManipulator.manipulateAsync(
       uri,
-      [], // no resize or crop, just format conversion
+      [], 
       { format: ImageManipulator.SaveFormat.PNG }
     );
     return result.uri;
   };
   const uploadProfileImageToBackend = async (userId: string, uri: string) => {
     try {
-      // Convert image to PNG
       const pngUri = await convertToPNG(uri);
-
       const responseFetch = await fetch(pngUri);
       const blob = await responseFetch.blob();
-
       const contentType = 'image/png'; // force png
 
       const response = await fetch(`https://synqapp.com/api/users/${userId}/images/profileImage`, {
@@ -213,12 +202,10 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       }
       const data = await response.json();
     } catch (error: any) {
-      console.error('❌ Failed to upload profile image to backend:', error.message);
-      // Alert.alert('Error', 'Could not sync profile image with server.');
+      // Testing uploading image to Chris's backend
+      console.log('Failed to upload profile image to backend:', error.message);
     }
   };
-
-
 
   const signOut = async () => {
     Alert.alert(
