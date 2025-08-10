@@ -1,24 +1,9 @@
+// NEEDS STYLING FIXES
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  Alert,
-  ActivityIndicator,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
+import { TextInput, Button, Alert, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import { View, Text } from '../components/Themed';
 import { getAuth } from 'firebase/auth';
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  setDoc,
-  doc,
-} from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, setDoc, doc } from 'firebase/firestore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -35,54 +20,53 @@ const AddFriendScreen = ({ navigation }: AddFriendScreenProps) => {
   const db = getFirestore();
   const currentUser = auth.currentUser;
 
-const handleSearch = async () => {
-  const trimmed = searchTerm.trim();
-  if (!trimmed) return;
+  const handleSearch = async () => {
+    const trimmed = searchTerm.trim();
+    if (!trimmed) return;
 
-  setLoading(true);
-  setFoundUser(null);
+    setLoading(true);
+    setFoundUser(null);
 
-  try {
-    const usersRef = collection(db, 'users');
+    try {
+      const usersRef = collection(db, 'users');
+      const emailQuery = query(usersRef, where('email', '==', trimmed));
+      const phoneQuery = query(usersRef, where('phoneNumber', '==', trimmed));
+      const nameQuery = query(usersRef, where('displayName', '==', trimmed));
 
-    const emailQuery = query(usersRef, where('email', '==', trimmed));
-    const phoneQuery = query(usersRef, where('phoneNumber', '==', trimmed));
-    const nameQuery = query(usersRef, where('displayName', '==', trimmed));
+      const [emailSnap, phoneSnap, nameSnap] = await Promise.all([
+        getDocs(emailQuery),
+        getDocs(phoneQuery),
+        getDocs(nameQuery),
+      ]);
 
-    const [emailSnap, phoneSnap, nameSnap] = await Promise.all([
-      getDocs(emailQuery),
-      getDocs(phoneQuery),
-      getDocs(nameQuery),
-    ]);
+      const allDocs = [...emailSnap.docs, ...phoneSnap.docs, ...nameSnap.docs];
 
-    const allDocs = [...emailSnap.docs, ...phoneSnap.docs, ...nameSnap.docs];
-
-    const uniqueUsers = new Map<string, any>();
-    allDocs.forEach((docSnap) => {
-      if (!uniqueUsers.has(docSnap.id)) {
-        uniqueUsers.set(docSnap.id, docSnap);
-      }
-    });
-
-    uniqueUsers.delete(currentUser?.uid || '');
-
-    if (uniqueUsers.size === 0) {
-      Alert.alert('No user found with that name, email, or phone number.');
-    } else {
-      const firstDoc = Array.from(uniqueUsers.values())[0];
-      const userData = firstDoc.data();
-      setFoundUser({
-        ...userData,
-        uid: firstDoc.id,
+      const uniqueUsers = new Map<string, any>();
+      allDocs.forEach((docSnap) => {
+        if (!uniqueUsers.has(docSnap.id)) {
+          uniqueUsers.set(docSnap.id, docSnap);
+        }
       });
-    }
-  } catch (err) {
-    console.error(err);
-    Alert.alert('Error searching for user.');
-  }
 
-  setLoading(false);
-};
+      uniqueUsers.delete(currentUser?.uid || '');
+
+      if (uniqueUsers.size === 0) {
+        Alert.alert('No user found with that name, email, or phone number.');
+      } else {
+        const firstDoc = Array.from(uniqueUsers.values())[0];
+        const userData = firstDoc.data();
+        setFoundUser({
+          ...userData,
+          uid: firstDoc.id,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error searching for user.');
+    }
+
+    setLoading(false);
+  };
 
   const handleSendRequest = async () => {
     if (!foundUser || !currentUser) return;
@@ -102,6 +86,10 @@ const handleSearch = async () => {
       console.error(err);
       Alert.alert('Error sending friend request.');
     }
+  };
+
+  const navigateToNetworkTab = () => {
+    navigation.navigate('Network');
   };
 
   return (
@@ -157,16 +145,19 @@ const handleSearch = async () => {
               {foundUser.phoneNumber || ''}
             </Text>
             <TouchableOpacity
-            onPress={handleSendRequest}
-            className="mt-3 bg-[#1DB954] py-2 px-4 items-center w-3/4 rounded-lg"
-            activeOpacity={0.8}
+              onPress={handleSendRequest}
+              className="mt-3 bg-[#1DB954] py-2 px-4 items-center w-3/4 rounded-lg"
+              activeOpacity={0.8}
             >
-            <Text className="text-white">Send Friend Request</Text>
+              <Text className="text-white">Send Friend Request</Text>
             </TouchableOpacity>
 
           </View>
         </View>
       )}
+      <TouchableOpacity onPress={navigateToNetworkTab} className="mt-4 p-2">
+        <Text className="text-blue-500 text-lg">Add from Contacts</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
