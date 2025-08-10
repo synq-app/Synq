@@ -1,23 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  Image,
-  FlatList,
-  ActivityIndicator
-} from 'react-native';
+import { TextInput, TouchableOpacity, Alert, ScrollView, Image, FlatList, ActivityIndicator } from 'react-native';
 import { Text, View } from '../components/Themed';
 import { getAuth } from 'firebase/auth';
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  getDocs,
-} from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, Timestamp } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import { ChatModal } from './ChatModal';
 import ChatPopup from './ChatPopup';
@@ -31,19 +16,23 @@ export const SynqScreen = ({ navigation }: any) => {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [intervalId, setIntervalId] = useState<NodeJS.Timer | null>(null);
   const [isUserAvailable, setIsUserAvailable] = useState(false);
-
   const [availableFriends, setAvailableFriends] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
-
   const [chatPopupVisible, setChatPopupVisible] = useState(false);
-const [currentChatFriend, setCurrentChatFriend] = useState<{
-  id: string;
-  displayName: string;
-  photoURL?: string;
-  chatId: string;
-} | null>(null);
+  const [currentChatFriend, setCurrentChatFriend] = useState<{
+    id: string;
+    displayName: string;
+    photoURL?: string;
+    chatId: string;
+  } | null>(null);
   const [allChatsVisible, setAllChatsVisible] = useState(false);
+  const [groupChatPopupVisible, setGroupChatPopupVisible] = useState(false);
+  const [groupChatInfo, setGroupChatInfo] = useState<{
+    chatId: string;
+    participants: string[];
+    groupName: string;
+  } | null>(null);
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -204,9 +193,8 @@ const [currentChatFriend, setCurrentChatFriend] = useState<{
                       setCurrentChatFriend(item);
                       setChatPopupVisible(true);
                     }}
-                    className={`p-4 m-2 rounded-xl flex-row items-center border-2 ${
-                      isSelected ? 'border-[#1DB954]' : 'border-white'
-                    }`}
+                    className={`p-4 m-2 rounded-xl flex-row items-center border-2 ${isSelected ? 'border-[#1DB954]' : 'border-white'
+                      }`}
                   >
                     <Image
                       source={{
@@ -227,25 +215,47 @@ const [currentChatFriend, setCurrentChatFriend] = useState<{
 
             <TouchableOpacity
               disabled={selectedFriends.length === 0}
-              onPress={() => {
+              onPress={async () => {
                 if (selectedFriends.length === 1) {
                   const friend = availableFriends.find(f => f.id === selectedFriends[0]);
                   if (friend) {
                     setCurrentChatFriend(friend);
                     setChatPopupVisible(true);
                   }
-                } else {
+                }
+                else if (selectedFriends.length > 1) {
+                  const currentUser = auth.currentUser;
+                  if (!currentUser) return;
+
+                  const groupParticipants = [currentUser.uid, ...selectedFriends];
+                  const groupName = `Group with ${selectedFriends.length} friends`; 
+
+                  const chatDocRef = doc(collection(db, 'chats'));
+                  await setDoc(chatDocRef, {
+                    participants: groupParticipants,
+                    type: 'group',
+                    groupName,
+                    createdAt: Timestamp.now(),
+                  });
+
+                  setGroupChatInfo({
+                    chatId: chatDocRef.id,
+                    participants: groupParticipants,
+                    groupName,
+                  });
+
+                  setGroupChatPopupVisible(true);
+                }
+                else {
                   Alert.alert('Group chat coming soon');
                 }
               }}
-              className={`${
-                selectedFriends.length > 0 ? 'bg-[#1DB954]' : 'bg-gray-600'
-              } py-4 px-8 rounded-xl self-center mb-6`}
+              className={`${selectedFriends.length > 0 ? 'bg-[#1DB954]' : 'bg-gray-600'
+                } py-4 px-8 rounded-xl self-center mb-6`}
             >
               <Text
-                className={`text-center text-lg ${
-                  selectedFriends.length > 0 ? 'text-black font-bold' : 'text-white'
-                }`}
+                className={`text-center text-lg ${selectedFriends.length > 0 ? 'text-black font-bold' : 'text-white'
+                  }`}
               >
                 Connect
               </Text>
@@ -258,12 +268,29 @@ const [currentChatFriend, setCurrentChatFriend] = useState<{
           onClose={() => setChatPopupVisible(false)}
           friend={currentChatFriend}
         />
+        {groupChatInfo && (
+          <ChatPopup
+            visible={groupChatPopupVisible}
+            onClose={() => {
+              setGroupChatPopupVisible(false);
+              navigation.navigate('FullChatScreen', {
+                chatId: groupChatInfo.chatId,
+                type: 'group',
+                groupName: groupChatInfo.groupName,
+                participants: groupChatInfo.participants,
+              });
+              setSelectedFriends([]); 
+              setGroupChatInfo(null);
+            }}
+            groupChat={groupChatInfo} 
+          />
+        )}
 
         <ChatModal
           visible={allChatsVisible}
           onClose={() => setAllChatsVisible(false)}
           onOpenChat={(friend: any) => {
-            setAllChatsVisible(false); // hide modal
+            setAllChatsVisible(false);
             navigation.navigate('FullChatScreen', {
               chatId: friend.chatId,
               friendId: friend.id,
@@ -272,7 +299,6 @@ const [currentChatFriend, setCurrentChatFriend] = useState<{
             });
           }}
         />
-
       </View>
     );
   }
@@ -284,7 +310,7 @@ const [currentChatFriend, setCurrentChatFriend] = useState<{
           <Text className="text-white text-2xl text-center mt-20 font-semibold">
             Tap when you're free to meet up
           </Text>
-
+          
           <View className="w-[90%] my-5">
             <TextInput
               multiline
