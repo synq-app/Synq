@@ -11,7 +11,6 @@ import { HomeScreen } from '../screens/Home';
 import { NetworkScreen } from '../screens/Network';
 import { ProfileScreen } from '../screens/Profile';
 import { SynqScreen } from '../screens/Synq';
-import { ChatStackNavigator } from './ChatStackNavigator';
 import WelcomeScreen from '../screens/FirstTimeUser/Welcome';
 import SignInWithEmail from '../screens/FirstTimeUser/SignInWithEmail';
 import SignInWithPhoneNumber from '../screens/FirstTimeUser/SignInWithPhoneNumber';
@@ -53,7 +52,6 @@ export function ReturningUserStackNavigator() {
       <ReturningUserStack.Screen name="AvailableFriends" component={AvailableFriends} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="AllFriends" component={FriendsScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="StepThree" component={StepThree} options={{ headerShown: false }} />
-      <ReturningUserStack.Screen name="Chats" component={ChatStackNavigator} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="AllChats" component={AllChatsScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="EditMemoScreen" component={EditMemoScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="GettingStarted" component={GettingStarted} options={{ headerShown: false }} />
@@ -131,15 +129,7 @@ function BottomTabNavigator() {
       //   <TabBarIcon name="code" color={color} />,
       // }}
       />
-      {/* 
-      <BottomTab.Screen
-        name="Chats"
-        component={ChatStackNavigator}
-        options={{
-          headerTitle: "",
-          tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
-        }}
-      /> */}
+
       <BottomTab.Screen
         name="Me"
         component={ProfileNavigator}
