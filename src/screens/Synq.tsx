@@ -151,6 +151,7 @@ export const SynqScreen = ({ navigation }: any) => {
       if (user) {
         const userSnap = await getDoc(doc(db, 'users', user.uid));
         const data = userSnap.data();
+        console.log('User data:', data);
         if (data?.status === 'available') {
           setIsUserAvailable(true);
           fetchAvailableFriends();
@@ -228,7 +229,7 @@ export const SynqScreen = ({ navigation }: any) => {
                   if (!currentUser) return;
 
                   const groupParticipants = [currentUser.uid, ...selectedFriends];
-                  const groupName = `Group with ${selectedFriends.length} friends`; 
+                  const groupName = `Group with ${selectedFriends.length} friends`;
 
                   const chatDocRef = doc(collection(db, 'chats'));
                   await setDoc(chatDocRef, {
@@ -260,6 +261,12 @@ export const SynqScreen = ({ navigation }: any) => {
                 Connect
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={stopTimer}
+              className="bg-red-600 py-3 px-6 rounded-xl self-center mb-6"
+            >
+              <Text className="text-white text-lg font-semibold">Deactivate Synq</Text>
+            </TouchableOpacity>
           </>
         )}
 
@@ -279,10 +286,10 @@ export const SynqScreen = ({ navigation }: any) => {
                 groupName: groupChatInfo.groupName,
                 participants: groupChatInfo.participants,
               });
-              setSelectedFriends([]); 
+              setSelectedFriends([]);
               setGroupChatInfo(null);
             }}
-            groupChat={groupChatInfo} 
+            groupChat={groupChatInfo}
           />
         )}
 
@@ -310,7 +317,7 @@ export const SynqScreen = ({ navigation }: any) => {
           <Text className="text-white text-2xl text-center mt-20 font-semibold">
             Tap when you're free to meet up
           </Text>
-          
+
           <View className="w-[90%] my-5">
             <TextInput
               multiline
