@@ -7,7 +7,6 @@ import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
-import { HomeScreen } from '../screens/Home';
 import { NetworkScreen } from '../screens/Network';
 import { ProfileScreen } from '../screens/Profile';
 import { SynqScreen } from '../screens/Synq';
@@ -55,8 +54,7 @@ export function ReturningUserStackNavigator() {
       <ReturningUserStack.Screen name="AllChats" component={AllChatsScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="EditMemoScreen" component={EditMemoScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="GettingStarted" component={GettingStarted} options={{ headerShown: false }} />
-            <ReturningUserStack.Screen name="FullChatScreen" component={FullChatScreen} options={{ headerShown: false }} />
-
+      <ReturningUserStack.Screen name="FullChatScreen" component={FullChatScreen} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="SynqActivated" component={SynqActivated} options={{ headerShown: false }} />
       <ReturningUserStack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <ReturningUserStack.Group screenOptions={{ presentation: 'modal' }}>
@@ -81,27 +79,6 @@ function BottomTabNavigator() {
         tabBarActiveTintColor: Colors[colorScheme].accent,
         headerShown: false,
       }}>
-      {/* <BottomTab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={({ navigation }) => ({
-          tabBarIcon: ({ color }) => <TabBarIcon name="address-book" color={color} />,
-          headerRight: () => (
-            <Pressable
-              onPress={() => navigation.navigate('Modal')}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-              })}>
-              <FontAwesome
-                name="info-circle"
-                size={25}
-                color={Colors[colorScheme].text}
-                style={{ marginRight: 15 }}
-              />
-            </Pressable>
-          ),
-        })}
-      /> */}
       <BottomTab.Screen
         name="Friends"
         component={FriendsScreen}
@@ -115,19 +92,15 @@ function BottomTabNavigator() {
         options={{
           tabBarIcon: ({ color, size }) => (
             <Image
-              source={require('../assets/animations/pulse.gif')}  // Adjusted path to your gif
+              source={require('../assets/animations/pulse.gif')} 
               style={{
-                width: 40,  // You can adjust size as needed
+                width: 40,
                 height: 40,
                 zIndex: 10
               }}
             />
           ),
         }}
-      // options={{
-      //   tabBarIcon: ({ color }) => 
-      //   <TabBarIcon name="code" color={color} />,
-      // }}
       />
 
       <BottomTab.Screen
