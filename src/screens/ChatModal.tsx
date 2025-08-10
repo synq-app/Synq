@@ -180,6 +180,7 @@ export const ChatModal = ({
                   position: 'absolute',
                   left: index * 16,
                   backgroundColor: '#333',
+                  top: index * 8
                 }}
               >
                 <Image

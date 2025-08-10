@@ -2,20 +2,59 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Alert, TextInput, TouchableOpacity } from 'react-native';
 import { Text, View } from '../components/Themed';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, Timestamp, doc, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, Timestamp, doc, setDoc, getDoc } from 'firebase/firestore';
 
 const auth = getAuth();
 const db = getFirestore();
 
 const ChatPopup = ({ visible, onClose, friend, groupChat }: any) => {
   const [message, setMessage] = useState('');
+  const [chatName, setChatName] = useState('');
 
-  // Optional: Reset message input when popup opens
   useEffect(() => {
     if (visible) {
       setMessage('');
+      buildChatName();
     }
-  }, [visible]);
+  }, [visible, friend, groupChat]);
+
+  const buildChatName = async () => {
+    if (groupChat) {
+      if (groupChat.participants && Array.isArray(groupChat.participants)) {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
+
+        try {
+          const names = await Promise.all(
+            groupChat.participants
+              .filter((uid: string) => uid !== currentUser.uid)
+              .map(async (uid: string) => {
+                const userDoc = await getDoc(doc(db, 'users', uid));
+                const userData = userDoc.exists() ? userDoc.data() : null;
+                return userData?.displayName || 'Unnamed';
+              })
+          );
+
+          if (names.length === 0) {
+            setChatName('Unnamed Group');
+          } else if (names.length === 1) {
+            setChatName(names[0]);
+          } else {
+            const lastName = names.pop();
+            setChatName(names.length > 0 ? names.join(', ') + ' and ' + lastName : lastName);
+          }
+        } catch {
+          setChatName(groupChat.groupName || 'Group Chat');
+        }
+      } else {
+        setChatName(groupChat.groupName || 'Group Chat');
+      }
+    } else if (friend) {
+      setChatName(friend.displayName || 'Friend');
+    } else {
+      setChatName('Chat');
+    }
+  };
 
   const handleSend = async () => {
     if (!message.trim()) {
@@ -91,17 +130,11 @@ const ChatPopup = ({ visible, onClose, friend, groupChat }: any) => {
     }
   };
 
-  const chatName = groupChat
-    ? groupChat.groupName
-    : friend?.displayName || 'Friend';
-
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 justify-center items-center bg-black/80 px-6">
         <View className="bg-[#222] p-5 rounded-2xl w-full">
-          <Text className="text-white text-lg mb-3">
-            Chat with {chatName}
-          </Text>
+          <Text className="text-white text-lg mb-3">Chat with {chatName}</Text>
 
           <TextInput
             className="bg-white text-black rounded-lg p-3 mb-4 min-h-[60px]"
@@ -113,7 +146,7 @@ const ChatPopup = ({ visible, onClose, friend, groupChat }: any) => {
             textAlignVertical="top"
           />
 
-          <View className="flex-row justify-between">
+          <View className="flex-row justify-between bg-transparent">
             <TouchableOpacity
               onPress={onClose}
               className="bg-gray-600 px-5 py-2 rounded-lg"
