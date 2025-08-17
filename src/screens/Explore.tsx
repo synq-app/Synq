@@ -11,6 +11,8 @@ import {
 import { Text, View } from '../components/Themed';
 import axios from 'axios';
 import { ENV_VARS } from '../../config';
+import ChatPopup from './ChatPopup';
+import { ActivityChatPopup } from './ActivityChatPopup';
 
 const accentGreen = '#7DFFA6';
 
@@ -28,16 +30,20 @@ export const Explore = ({ navigation }: { navigation: any }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [chatPopupVisible, setChatPopupVisible] = useState(false);
+  const [chatFriend, setChatFriend] = useState<any>(null);
+
+  const handleSendToFriend = (friend: any) => {
+    if (!selectedActivity) return;
+    setChatFriend(friend);
+    setChatPopupVisible(true);
+  };
 
   const fetchActivityRecommendations = async (category: string) => {
     setIsLoading(true);
     try {
       const response = await axios.get('https://api.foursquare.com/v3/places/search', {
-        params: {
-          query: category,
-          near: 'Washington, DC',
-          limit: 5,
-        },
+        params: { query: category, near: 'Washington, DC', limit: 5 },
         headers: {
           Authorization: ENV_VARS.FOURSQUARE_API_KEY,
           accept: 'application/json',
@@ -49,35 +55,19 @@ export const Explore = ({ navigation }: { navigation: any }) => {
       const placesWithImages = await Promise.all(
         places.map(async (place: any) => {
           let imageUrl = '';
-
           try {
             const photoRes = await axios.get(
               `https://api.foursquare.com/v3/places/${place.fsq_id}/photos`,
-              {
-                headers: {
-                  Authorization: ENV_VARS.FOURSQUARE_API_KEY,
-                  accept: 'application/json',
-                },
-              }
+              { headers: { Authorization: ENV_VARS.FOURSQUARE_API_KEY, accept: 'application/json' } }
             );
-
             const photo = photoRes.data[0];
-            if (photo) {
-              imageUrl = `${photo.prefix}original${photo.suffix}`;
-            }
-          } catch {
-            console.warn(`No photo found for ${place.name}`);
-          }
-
+            if (photo) imageUrl = `${photo.prefix}original${photo.suffix}`;
+          } catch {}
           if (!imageUrl && place.categories?.[0]?.icon) {
             const icon = place.categories[0].icon;
             imageUrl = `${icon.prefix}bg_64${icon.suffix}`;
           }
-
-          if (!imageUrl) {
-            imageUrl = 'https://via.placeholder.com/300';
-          }
-
+          if (!imageUrl) imageUrl = 'https://via.placeholder.com/300';
           return {
             name: place.name,
             rating: 4.0,
@@ -101,7 +91,12 @@ export const Explore = ({ navigation }: { navigation: any }) => {
 
   return (
     <View className="mt-10">
-      <Text className="text-3xl mt-16 ml-8 font-semibold">Explore</Text>
+      <View className="flex-row justify-between items-center px-8 mt-16">
+        <Text className="text-3xl font-semibold">Explore</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text className="text-3xl text-gray-400">×</Text>
+        </TouchableOpacity>
+      </View>
 
       <TextInput
         className="h-10 border border-gray-300 rounded-full px-4 mx-5 mt-10 text-base text-white"
@@ -141,8 +136,17 @@ export const Explore = ({ navigation }: { navigation: any }) => {
                   setModalVisible(true);
                 }}
               >
-                <View className="p-2 mb-3 bg-gray-100 rounded-xl w-[350px] ml-5">
-                  <Text className="text-lg text-gray-800">{item.name}</Text>
+                <View className="flex-row items-center p-2 mb-3 bg-gray-100 rounded-xl w-[350px] ml-5">
+                  <Image
+                    source={{ uri: item.image }}
+                    className="w-[60px] h-[60px] rounded-lg mr-3"
+                  />
+                  <View className="flex-1 bg-white">
+                    <Text className="text-lg text-gray-800 font-semibold">{item.name}</Text>
+                    <Text className="text-sm text-gray-600">
+                      ⭐ {item.rating} • 📍 {item.location}
+                    </Text>
+                  </View>
                 </View>
               </TouchableOpacity>
             )}
@@ -153,6 +157,7 @@ export const Explore = ({ navigation }: { navigation: any }) => {
         )}
       </View>
 
+      {/* Activity Details Modal */}
       <Modal animationType="slide" transparent visible={modalVisible}>
         <TouchableOpacity
           className="flex-1 justify-center items-center bg-black/50"
@@ -166,12 +171,26 @@ export const Explore = ({ navigation }: { navigation: any }) => {
             <Text className="text-xl font-bold text-black mb-2">{selectedActivity?.name}</Text>
             <Text className="text-base text-black mb-1">⭐ Rating: {selectedActivity?.rating}</Text>
             <Text className="text-base text-black mb-3">📍 Location: {selectedActivity?.location}</Text>
-            <TouchableOpacity className="bg-[#7DFFA6] px-5 py-2 rounded-lg mt-2">
+            <TouchableOpacity
+              className="bg-[#7DFFA6] px-5 py-2 rounded-lg mt-2"
+              onPress={() => {
+                setModalVisible(false);
+                setChatPopupVisible(true);
+              }}
+            >
               <Text className="text-black font-semibold">Send to Friend</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {selectedActivity && (
+        <ActivityChatPopup
+          visible={chatPopupVisible}
+          onClose={() => setChatPopupVisible(false)}
+          activity={selectedActivity}
+        />
+      )}
     </View>
   );
 };

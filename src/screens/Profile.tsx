@@ -145,7 +145,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
-
       const uploadTask = uploadBytesResumable(storageRef, blob);
 
       uploadTask.on('state_changed',
@@ -158,12 +157,10 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setImageUrl(downloadURL);
           setIsUploading(false);
-
           const userDocRef = doc(db, 'users', auth.currentUser!.uid);
           await updateDoc(userDocRef, {
             imageurl: downloadURL,
           });
-
           if (auth.currentUser) {
             await uploadProfileImageToBackend(auth.currentUser.uid, uri);
           }
@@ -187,7 +184,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       const pngUri = await convertToPNG(uri);
       const responseFetch = await fetch(pngUri);
       const blob = await responseFetch.blob();
-      const contentType = 'image/png'; // force png
+      const contentType = 'image/png';
 
       const response = await fetch(`https://synqapp.com/api/users/${userId}/images/profileImage`, {
         method: 'PUT',
@@ -272,7 +269,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     fetchUserInterests();
   }, []);
 
-  return (
+ return (
     <ScrollView className="bg-primary-background" style={{ flex: 1 }}>
       <View className="flex flex-row justify-between p-4 mt-16 mb-[-10px] bg-black">
         <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
@@ -282,7 +279,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           <Icon name="settings-outline" size={26} color="#7DFFA6" />
         </TouchableOpacity>
       </View>
-      <View className="py-12 items-center bg-black">
+      <View className="py-6 items-center bg-black">
         <View className="w-48 h-48 items-center justify-center relative">
           <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center z-0">
             <View className="opacity-50 border-2 border-[#7DFFA6] rounded-xl p-1">
@@ -313,11 +310,18 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             <Icon name="qr-code-outline" size={24} color="#000" />
           </TouchableOpacity>
         </View>
-        <SynqText className="text-2xl mt-5 font-medium text-accent">{auth.currentUser?.displayName}</SynqText>
-        <SynqText className="text-sm ml-4 mt-2">{city}, {state}</SynqText>
+        <SynqText className="text-2xl mt-5 font-medium text-accent">
+          {auth.currentUser?.displayName}
+        </SynqText>
+        <SynqText className="text-sm ml-4 mt-2">
+          {city}, {state}
+        </SynqText>
         <View>
           <SynqText>{memo || ""}</SynqText>
         </View>
+        <TouchableOpacity onPress={() => navigation.navigate('Explore')}>
+          <SynqText>Need inspo? Click here!</SynqText>
+        </TouchableOpacity>
       </View>
       <Modal visible={isQRExpanded} transparent animationType="fade">
         <TouchableOpacity
@@ -338,7 +342,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           </View>
         </TouchableOpacity>
       </Modal>
-      <View className="bg-black">
+      <View className="bg-black mt-2">
         <SynqText className="text-lg font-medium ml-4 text-primary-text mb-2">Top Synqs</SynqText>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-4">
           {connections.length > 0 ? (
@@ -377,47 +381,46 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             <SynqText className="text-white text-xs mt-2 text-center">Add</SynqText>
           </TouchableOpacity>
         </ScrollView>
-
-        <Modal visible={showInputModal} transparent animationType="fade">
-          <TouchableOpacity
-            className="flex-1 justify-center items-center bg-blur bg-opacity-50"
-            activeOpacity={1}
-            onPressOut={() => setShowInputModal(false)}
-          >
-            <View
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.9)',
-              }}
-            />
-            <View className="bg-black p-6 rounded-lg w-80 border border-gray-700">
-              <SynqText className="text-white text-lg mb-4">What's your favorite social activity?</SynqText>
-              <TextInput
-                className="h-10 w-full bg-gray-800 text-white rounded-full pl-4 pb-2 text-base"
-                placeholder="Enter your interest"
-                placeholderTextColor="#aaa"
-                value={newInterest}
-                onChangeText={setNewInterest}
-              />
-              <View className="flex flex-row justify-between mt-4">
-                <TouchableOpacity
-                  onPress={() => setShowInputModal(false)}
-                  className="bg-gray-700 px-5 py-2 rounded-full"
-                >
-                  <SynqText className="text-white">Cancel</SynqText>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={addInterest} className="bg-[#7DFFA6] px-5 py-2 rounded-full">
-                  <SynqText className="text-black">Add</SynqText>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </Modal>
       </View>
+      <Modal visible={showInputModal} transparent animationType="fade">
+        <TouchableOpacity
+          className="flex-1 justify-center items-center bg-blur bg-opacity-50"
+          activeOpacity={1}
+          onPressOut={() => setShowInputModal(false)}
+        >
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            }}
+          />
+          <View className="bg-black p-6 rounded-lg w-80 border border-gray-700">
+            <SynqText className="text-white text-lg mb-4">What's your favorite social activity?</SynqText>
+            <TextInput
+              className="h-10 w-full bg-gray-800 text-white rounded-full pl-4 pb-2 text-base"
+              placeholder="Enter your interest"
+              placeholderTextColor="#aaa"
+              value={newInterest}
+              onChangeText={setNewInterest}
+            />
+            <View className="flex flex-row justify-between mt-4">
+              <TouchableOpacity
+                onPress={() => setShowInputModal(false)}
+                className="bg-gray-700 px-5 py-2 rounded-full"
+              >
+                <SynqText className="text-white">Cancel</SynqText>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={addInterest} className="bg-[#7DFFA6] px-5 py-2 rounded-full">
+                <SynqText className="text-black">Add</SynqText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
       <TouchableOpacity onPress={signOut} className="bg-black w-32 h-8 rounded-lg self-center mt-10 mb-10 border border-white">
         <SynqText className="text-white text-center text-lg">Sign Out</SynqText>
       </TouchableOpacity>
