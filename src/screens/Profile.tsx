@@ -19,6 +19,9 @@ type AuthProps = {
   navigation: any;
 };
 
+// Flatten the presetActivities data for a single list
+const allActivities = Object.values(presetActivities).flat();
+
 export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [profileImage, setProfileImage] = useState<string | undefined>();
   const [isQRExpanded, setQRExpanded] = useState(false);
@@ -26,12 +29,11 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [imageUrl, setImageUrl] = useState<string | undefined>("");
   const [showInputModal, setShowInputModal] = useState(false);
   const [connections, setConnections] = useState<{ name: string; imageUrl: string }[]>([]);
-  const [newInterest, setNewInterest] = useState('');
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
   const [city, setCity] = useState<string>('');
   const [state, setState] = useState<string>('');
   const [memo, setMemo] = useState<string>('');
-  const [showInput, setShowInput] = useState(false);
 
   const accountData = {
     id: auth.currentUser?.uid,
@@ -50,6 +52,8 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           setCity(userData.city || 'Not available');
           setState(stateAbbreviation);
           setMemo(userData.memo || '');
+          setInterests(userData.interests || []);
+          setSelectedInterests(userData.interests || []);
         } else {
           console.log('No such document!');
         }
@@ -85,7 +89,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       );
 
       const validFriends = friendsList.filter(Boolean) as { name: string; imageUrl: string }[];
-
       setConnections(validFriends);
     } catch (error) {
       console.error("Error fetching top connections:", error);
@@ -171,14 +174,16 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       setIsUploading(false);
     }
   };
+
   const convertToPNG = async (uri: string): Promise<string> => {
     const result = await ImageManipulator.manipulateAsync(
       uri,
-      [], 
+      [],
       { format: ImageManipulator.SaveFormat.PNG }
     );
     return result.uri;
   };
+
   const uploadProfileImageToBackend = async (userId: string, uri: string) => {
     try {
       const pngUri = await convertToPNG(uri);
@@ -199,7 +204,6 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       }
       const data = await response.json();
     } catch (error: any) {
-      // Testing uploading image to Chris's backend
       console.log('Failed to upload profile image to backend:', error.message);
     }
   };
@@ -230,47 +234,37 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     );
   };
 
-  const addInterest = async () => {
-    if (newInterest.trim() !== '') {
-      setInterests(prevInterests => {
-        const updatedInterests = [...prevInterests, newInterest];
-        if (auth.currentUser) {
-          const userDocRef = doc(db, 'users', auth.currentUser.uid);
-          updateDoc(userDocRef, {
-            interests: updatedInterests
-          })
-            .then(() => {
-              console.log("Interests updated successfully");
-            })
-            .catch((error) => {
-              console.error("Error updating interests: ", error);
-            });
-        }
-        return updatedInterests;
-      });
-      setNewInterest('');
-      setShowInput(false);
+  const handleInterestSelection = (interest: string) => {
+    setSelectedInterests(prev => {
+      if (prev.includes(interest)) {
+        return prev.filter(i => i !== interest);
+      } else {
+        return [...prev, interest];
+      }
+    });
+  };
+
+  const saveInterests = async () => {
+    if (auth.currentUser) {
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+      try {
+        await updateDoc(userDocRef, { interests: selectedInterests });
+        setInterests(selectedInterests);
+        setShowInputModal(false);
+      } catch (error) {
+        console.error("Error saving interests:", error);
+        Alert.alert("Error", "Could not save interests. Please try again.");
+      }
     }
   };
 
-  useEffect(() => {
-    const fetchUserInterests = async () => {
-      if (auth.currentUser?.uid) {
-        const userDocRef = doc(db, 'users', auth.currentUser.uid);
-        const docSnap = await getDoc(userDocRef);
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
-          if (userData?.interests) {
-            setInterests(userData.interests);
-          }
-        }
-      }
-    };
-    fetchUserInterests();
-  }, []);
+  const closeModal = () => {
+    setSelectedInterests(interests);
+    setShowInputModal(false);
+  };
 
- return (
-    <ScrollView className="bg-primary-background" style={{ flex: 1 }}>
+  return (
+    <ScrollView className="bg-black" style={{ flex: 1 }}>
       <View className="flex flex-row justify-between p-4 mt-16 mb-[-10px] bg-black">
         <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
           <Icon name="notifications-outline" size={26} color="#7DFFA6" />
@@ -320,7 +314,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           <SynqText>{memo || ""}</SynqText>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate('Explore')}>
-          <SynqText>Need inspo? Click here!</SynqText>
+          <SynqText>✨ Need inspo? Click here!</SynqText>
         </TouchableOpacity>
       </View>
       <Modal visible={isQRExpanded} transparent animationType="fade">
@@ -346,7 +340,8 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         <SynqText className="text-lg font-medium ml-4 text-primary-text mb-2">Top Synqs</SynqText>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-4">
           {connections.length > 0 ? (
-            connections.map((connection, index) => (
+            // Limit to the first 3 connections
+            connections.slice(0, 3).map((connection, index) => (
               <View key={index} className="items-center mr-4">
                 <Image
                   source={{ uri: connection.imageUrl }}
@@ -367,7 +362,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             <View key={interest} className="items-center mr-6">
               <Image
                 source={{
-                  uri: `https://picsum.photos/id/${(presetActivities as { [key: string]: { id: number; name: string } })[interest.toLowerCase()]?.id}/200/300`,
+                  uri: `https://picsum.photos/id/${allActivities.find(a => a.name === interest)?.id || 1084}/200/300`,
                 }}
                 className="w-16 h-16 rounded-full bg-white"
               />
@@ -386,7 +381,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         <TouchableOpacity
           className="flex-1 justify-center items-center bg-blur bg-opacity-50"
           activeOpacity={1}
-          onPressOut={() => setShowInputModal(false)}
+          onPressOut={closeModal}
         >
           <View
             style={{
@@ -399,25 +394,40 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             }}
           />
           <View className="bg-black p-6 rounded-lg w-80 border border-gray-700">
-            <SynqText className="text-white text-lg mb-4">What's your favorite social activity?</SynqText>
-            <TextInput
-              className="h-10 w-full bg-gray-800 text-white rounded-full pl-4 pb-2 text-base"
-              placeholder="Enter your interest"
-              placeholderTextColor="#aaa"
-              value={newInterest}
-              onChangeText={setNewInterest}
-            />
-            <View className="flex flex-row justify-between mt-4">
-              <TouchableOpacity
-                onPress={() => setShowInputModal(false)}
-                className="bg-gray-700 px-5 py-2 rounded-full"
-              >
-                <SynqText className="text-white">Cancel</SynqText>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={addInterest} className="bg-[#7DFFA6] px-5 py-2 rounded-full">
-                <SynqText className="text-black">Add</SynqText>
-              </TouchableOpacity>
+            <SynqText className="text-white text-lg mb-4 text-center font-bold">What are you into?</SynqText>
+            <SynqText className="text-gray-400 text-sm mb-4 text-center">Select your top 5 favorite activities.</SynqText>
+            <View className="flex-row justify-center mb-4">
+              {selectedInterests.slice(0, 5).map((interest, index) => (
+                <View key={index} className="px-3 py-1 bg-green-500 rounded-full m-1">
+                  <SynqText className="text-white text-xs">{interest}</SynqText>
+                </View>
+              ))}
             </View>
+            <ScrollView className="max-h-[300px]">
+              <View className="flex-row flex-wrap justify-center">
+                {allActivities.map(item => {
+                  const isSelected = selectedInterests.includes(item.name);
+                  return (
+                    <TouchableOpacity
+                      key={item.name}
+                      onPress={() => handleInterestSelection(item.name)}
+                      className={`rounded-full px-4 py-2 m-1 border ${isSelected ? 'border-green-500 bg-green-500' : 'border-gray-500 bg-gray-800'}`}
+                    >
+                      <SynqText className={`text-center text-sm ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                        {item.name}
+                      </SynqText>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </ScrollView>
+            <TouchableOpacity
+              onPress={saveInterests}
+              className={`py-3 rounded-full mt-4 ${selectedInterests.length > 0 ? 'bg-[#7DFFA6]' : 'bg-gray-700'}`}
+              disabled={selectedInterests.length === 0}
+            >
+              <SynqText className="text-black text-lg font-bold text-center">Save Interests</SynqText>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>

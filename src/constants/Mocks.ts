@@ -16,11 +16,13 @@ export const mockUsers: User[] = [
 export const mockChats: ChatPreviewRowProps[] = [{ id: "chat1", users: mockUsers, messages: [{ sender: mockMonaUser, text: "Thoughts on heading to Oak St beach?", id: "ChatMona1" }, { sender: mockKevinUser, text: "I'm so down!", id: "ChatKevin1" }, { sender: mockMonaUser, text: "Great. I'll start getting ready.", id: "ChatMona2" }] }, { id: "chat2", users: [mockCameronUser], messages: [{ sender: mockCameronUser, text: "Wanna join my other plan?", id: "ChatCameron1" }] }]
 
 export const presetActivities = {
-  walking: { id: 289, name: "walking" },
-  concerts: { id: 158, name: "concerts" },
-  hiking: { id: 28, name: "hiking" },
-  coffee: { id: 63, name: "coffee"},
-  surfing: { id: 67, name: "surfing"}
+  walking: { id: 289, name: "Walking" },
+  concerts: { id: 158, name: "Concerts" },
+  hiking: { id: 28, name: "Hiking" },
+  coffee: { id: 63, name: "Coffee"},
+  surfing: { id: 67, name: "Surfing"},
+  yoga: { id: 67, name: "Yoga"}
+
 
 };
 

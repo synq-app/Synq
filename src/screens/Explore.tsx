@@ -151,7 +151,6 @@ export const Explore = ({ navigation }: { navigation: any }) => {
               </TouchableOpacity>
             )}
             keyExtractor={(_, index) => index.toString()}
-            scrollEnabled={false}
             contentContainerStyle={{ paddingBottom: 20 }}
           />
         )}
@@ -190,8 +189,8 @@ export const Explore = ({ navigation }: { navigation: any }) => {
           onClose={() => setChatPopupVisible(false)}
           activity={selectedActivity}
           onCloseAndNavigateBack={() => {
-            setChatPopupVisible(false); // Close the popup
-            navigation.goBack(); // Go back to the previous screen
+            setChatPopupVisible(false);
+            navigation.goBack();
           }}
         />
       )}
