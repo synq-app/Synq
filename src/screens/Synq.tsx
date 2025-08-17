@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { TextInput, TouchableOpacity, Alert, ScrollView, Image, FlatList, ActivityIndicator } from 'react-native';
 import { Text, View } from '../components/Themed';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, Timestamp } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, Timestamp, updateDoc, increment } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import { ChatModal } from './ChatModal';
 import ChatPopup from './ChatPopup';
@@ -160,6 +160,63 @@ export const SynqScreen = ({ navigation }: any) => {
     };
     checkUserStatus();
   }, []);
+
+  // Function to increment the synqCount for a friend in Firebase
+  const incrementSynqCount = async (friendId: string) => {
+    if (!auth.currentUser) return;
+    const userId = auth.currentUser.uid;
+    const friendRef = doc(db, 'users', userId, 'friends', friendId);
+    
+    try {
+      await updateDoc(friendRef, {
+        synqCount: increment(1),
+      });
+    } catch (error) {
+      console.error('Error incrementing synq count:', error);
+    }
+  };
+  
+  const handleConnectPress = async () => {
+    if (selectedFriends.length === 0) return;
+
+    if (selectedFriends.length === 1) {
+      const friend = availableFriends.find(f => f.id === selectedFriends[0]);
+      if (friend) {
+        // Increment synq count for this single friend
+        await incrementSynqCount(friend.id);
+        setCurrentChatFriend(friend);
+        setChatPopupVisible(true);
+      }
+    } else { // Group chat
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+
+      const groupParticipants = [currentUser.uid, ...selectedFriends];
+      const groupName = `Group with ${selectedFriends.length} friends`;
+
+      const chatDocRef = doc(collection(db, 'chats'));
+      await setDoc(chatDocRef, {
+        participants: groupParticipants,
+        type: 'group',
+        groupName,
+        createdAt: Timestamp.now(),
+      });
+
+      // Increment synq count for all selected friends in the group
+      for (const friendId of selectedFriends) {
+        await incrementSynqCount(friendId);
+      }
+      
+      setGroupChatInfo({
+        chatId: chatDocRef.id,
+        participants: groupParticipants,
+        groupName,
+      });
+
+      setGroupChatPopupVisible(true);
+    }
+  };
+
   if (isUserAvailable) {
     return (
       <View className="flex-1 bg-black pt-4">
@@ -216,41 +273,7 @@ export const SynqScreen = ({ navigation }: any) => {
 
             <TouchableOpacity
               disabled={selectedFriends.length === 0}
-              onPress={async () => {
-                if (selectedFriends.length === 1) {
-                  const friend = availableFriends.find(f => f.id === selectedFriends[0]);
-                  if (friend) {
-                    setCurrentChatFriend(friend);
-                    setChatPopupVisible(true);
-                  }
-                }
-                else if (selectedFriends.length > 1) {
-                  const currentUser = auth.currentUser;
-                  if (!currentUser) return;
-
-                  const groupParticipants = [currentUser.uid, ...selectedFriends];
-                  const groupName = `Group with ${selectedFriends.length} friends`;
-
-                  const chatDocRef = doc(collection(db, 'chats'));
-                  await setDoc(chatDocRef, {
-                    participants: groupParticipants,
-                    type: 'group',
-                    groupName,
-                    createdAt: Timestamp.now(),
-                  });
-
-                  setGroupChatInfo({
-                    chatId: chatDocRef.id,
-                    participants: groupParticipants,
-                    groupName,
-                  });
-
-                  setGroupChatPopupVisible(true);
-                }
-                else {
-                  Alert.alert('Group chat coming soon');
-                }
-              }}
+              onPress={handleConnectPress}
               className={`${selectedFriends.length > 0 ? 'bg-[#1DB954]' : 'bg-gray-600'
                 } py-4 px-8 rounded-xl self-center mb-6`}
             >
@@ -274,6 +297,11 @@ export const SynqScreen = ({ navigation }: any) => {
           visible={chatPopupVisible}
           onClose={() => setChatPopupVisible(false)}
           friend={currentChatFriend}
+          onStartChat={() => {
+            if (currentChatFriend) {
+                incrementSynqCount(currentChatFriend.id);
+            }
+          }}
         />
         {groupChatInfo && (
           <ChatPopup

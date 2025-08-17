@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { SynqButton, SynqText, View } from '../components/Themed';
-import { Image, TouchableOpacity, Modal, Alert, ScrollView, TextInput } from 'react-native';
+import { Image, TouchableOpacity, Modal, Alert, ScrollView, TextInput, ActivityIndicator } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { getFirestore, doc, getDoc, setDoc, updateDoc, getDocs, collection, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, getDocs, collection, onSnapshot, FieldValue, increment } from "firebase/firestore";
 import * as ImagePicker from 'expo-image-picker';
 import { storage } from './FirstTimeUser/firebaseConfig';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -14,6 +14,13 @@ import * as ImageManipulator from 'expo-image-manipulator';
 const defaultPic = require('../assets/images/default-profile-pic.jpg');
 const db = getFirestore();
 const auth = getAuth();
+
+// Extend the connection type to include synqCount
+type Connection = {
+  name: string;
+  imageUrl: string;
+  synqCount: number;
+};
 
 type AuthProps = {
   navigation: any;
@@ -28,12 +35,14 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | undefined>("");
   const [showInputModal, setShowInputModal] = useState(false);
-  const [connections, setConnections] = useState<{ name: string; imageUrl: string }[]>([]);
+  // Update state type to use the new Connection type
+  const [connections, setConnections] = useState<Connection[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
   const [city, setCity] = useState<string>('');
   const [state, setState] = useState<string>('');
   const [memo, setMemo] = useState<string>('');
+  const [loadingConnections, setLoadingConnections] = useState(true);
 
   const accountData = {
     id: auth.currentUser?.uid,
@@ -41,8 +50,51 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     displayName: auth.currentUser?.displayName,
   };
 
+  const fetchConnections = async () => {
+    try {
+      if (!auth.currentUser) return;
+
+      const userId = auth.currentUser.uid;
+      const friendsCol = collection(db, "users", userId, "friends");
+      const friendsSnapshot = await getDocs(friendsCol);
+
+      const friendsList = await Promise.all(
+        friendsSnapshot.docs.map(async (friendDoc) => {
+          const friendId = friendDoc.id;
+          const friendData = friendDoc.data();
+          const friendProfileRef = doc(db, "users", friendId);
+          const friendProfileSnap = await getDoc(friendProfileRef);
+          
+          if (friendProfileSnap.exists()) {
+            const friendProfileData = friendProfileSnap.data();
+            return {
+              name: friendProfileData.displayName || "",
+              imageUrl: friendProfileData.imageurl || "",
+              // Get the synqCount from the friend's document within the current user's friends subcollection
+              synqCount: friendData.synqCount || 0,
+            };
+          } else {
+            return null;
+          }
+        })
+      );
+
+      const validFriends = friendsList.filter(Boolean) as Connection[];
+      
+      // Sort the friends by synqCount in descending order
+      validFriends.sort((a, b) => b.synqCount - a.synqCount);
+      
+      setConnections(validFriends);
+    } catch (error) {
+      console.error("Error fetching connections:", error);
+    } finally {
+      setLoadingConnections(false);
+    }
+  };
+
   useEffect(() => {
     if (auth.currentUser?.uid) {
+      // Real-time listener for user profile data
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
       const unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
         if (userDocSnap.exists()) {
@@ -54,68 +106,25 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           setMemo(userData.memo || '');
           setInterests(userData.interests || []);
           setSelectedInterests(userData.interests || []);
-        } else {
-          console.log('No such document!');
+          if (userData?.imageurl) {
+            setProfileImage(userData.imageurl);
+          }
         }
       });
-      return () => unsubscribe();
+
+      // Real-time listener for friend list and synq counts
+      const friendsCollectionRef = collection(db, "users", auth.currentUser.uid, "friends");
+      const unsubscribeFriends = onSnapshot(friendsCollectionRef, (querySnapshot) => {
+        setLoadingConnections(true);
+        fetchConnections();
+      });
+
+      return () => {
+        unsubscribe();
+        unsubscribeFriends();
+      };
     }
   }, []);
-
-  const fetchTopConnections = async () => {
-    try {
-      if (!auth.currentUser) return;
-
-      const userId = auth.currentUser.uid;
-      const friendsCol = collection(db, "users", userId, "friends");
-      const friendsSnapshot = await getDocs(friendsCol);
-
-      const friendsList = await Promise.all(
-        friendsSnapshot.docs.map(async (friendDoc) => {
-          const friendId = friendDoc.id;
-          const friendProfileRef = doc(db, "users", friendId);
-          const friendProfileSnap = await getDoc(friendProfileRef);
-
-          if (friendProfileSnap.exists()) {
-            const friendData = friendProfileSnap.data();
-            return {
-              name: friendData.displayName || "",
-              imageUrl: friendData.imageurl || "",
-            };
-          } else {
-            return null;
-          }
-        })
-      );
-
-      const validFriends = friendsList.filter(Boolean) as { name: string; imageUrl: string }[];
-      setConnections(validFriends);
-    } catch (error) {
-      console.error("Error fetching top connections:", error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchProfileImage = async () => {
-      if (auth.currentUser?.uid) {
-        const userDocRef = doc(db, 'users', auth.currentUser.uid);
-        const docSnap = await getDoc(userDocRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data?.imageurl) {
-            setProfileImage(data.imageurl);
-          }
-        } else {
-          await setDoc(userDocRef, { imageurl: "" });
-        }
-      }
-    };
-
-    if (auth.currentUser) {
-      fetchProfileImage();
-      fetchTopConnections();
-    }
-  }, [auth.currentUser]);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -123,7 +132,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: 'images',
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
@@ -263,6 +272,21 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
     setShowInputModal(false);
   };
 
+  const startChatAndIncrementSynqCount = async (friendId: string) => {
+    if (!auth.currentUser) return;
+    const userId = auth.currentUser.uid;
+    const friendRef = doc(db, 'users', userId, 'friends', friendId);
+    
+    try {
+      await updateDoc(friendRef, {
+        synqCount: increment(1),
+      });
+      console.log('Synq count incremented successfully!');
+    } catch (error) {
+      console.error('Error incrementing synq count:', error);
+    }
+  };
+
   return (
     <ScrollView className="bg-black" style={{ flex: 1 }}>
       <View className="flex flex-row justify-between p-4 mt-16 mb-[-10px] bg-black">
@@ -314,7 +338,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
           <SynqText>{memo || ""}</SynqText>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate('Explore')}>
-          <SynqText>✨ Need inspo? Click here!</SynqText>
+          <SynqText>Need inspo? Click here!</SynqText>
         </TouchableOpacity>
       </View>
       <Modal visible={isQRExpanded} transparent animationType="fade">
@@ -337,17 +361,19 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
         </TouchableOpacity>
       </Modal>
       <View className="bg-black mt-2">
-        <SynqText className="text-lg font-medium ml-4 text-primary-text mb-2">Top Synqs</SynqText>
+        <SynqText className="text-lg font-medium text-primary-text mb-2 px-4">Top Synqs</SynqText>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-4">
-          {connections.length > 0 ? (
-            // Limit to the first 3 connections
+          {loadingConnections ? (
+            <ActivityIndicator size="large" color="#1DB954" className="mx-auto" />
+          ) : connections.length > 0 ? (
             connections.slice(0, 3).map((connection, index) => (
               <View key={index} className="items-center mr-4">
                 <Image
-                  source={{ uri: connection.imageUrl }}
+                  source={{ uri: connection.imageUrl || 'https://www.gravatar.com/avatar/?d=mp&s=50' }}
                   className="w-16 h-16 rounded-full bg-white"
                 />
                 <SynqText className="text-primary-text text-xs mt-2 text-center" numberOfLines={1}>
+                  {/* {connection.name}: {connection.synqCount} */}
                   {connection.name}
                 </SynqText>
               </View>
@@ -356,7 +382,7 @@ export const ProfileScreen = ({ navigation }: AuthProps) => {
             <SynqText className="text-primary-text ml-4">No connections found.</SynqText>
           )}
         </ScrollView>
-        <SynqText className="text-lg font-medium ml-4 text-primary-text mt-6">Top Activities</SynqText>
+        <SynqText className="text-lg font-medium text-primary-text mt-6 px-4">Top Activities</SynqText>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="ml-4 mt-4">
           {interests.map((interest) => (
             <View key={interest} className="items-center mr-6">
