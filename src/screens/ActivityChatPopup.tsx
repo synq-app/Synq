@@ -24,15 +24,17 @@ export const ActivityChatPopup = ({
   visible,
   onClose,
   activity,
+  onCloseAndNavigateBack,
 }: {
   visible: boolean;
   onClose: () => void;
   activity: Activity;
+  onCloseAndNavigateBack: () => void;
 }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
-  const [showConfirmation, setShowConfirmation] = useState(false); // New state for confirmation modal
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState('');
 
   const currentUser = auth.currentUser;
@@ -41,7 +43,7 @@ export const ActivityChatPopup = ({
   useEffect(() => {
     if (!visible) {
       setSelectedFriends([]);
-      setShowConfirmation(false); // Reset on close
+      setShowConfirmation(false);
       return;
     }
 
@@ -190,7 +192,7 @@ export const ActivityChatPopup = ({
           <TouchableOpacity
             onPress={() => {
               setShowConfirmation(false);
-              onClose();
+              onCloseAndNavigateBack();
             }}
             className="bg-green-600 px-5 py-3 rounded-lg"
           >
@@ -205,10 +207,13 @@ export const ActivityChatPopup = ({
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 justify-center items-center bg-black/80 px-6">
         <View className="bg-gray-900 p-5 rounded-2xl w-full max-h-[90%]">
-          <ScrollView>
+          <View className="flex-row justify-between items-center w-full">
             <Text className="text-white text-2xl mb-3 font-bold">Send Activity</Text>
-
-            {/* Activity Preview */}
+            <TouchableOpacity onPress={onCloseAndNavigateBack} className="p-2">
+              <Text className="text-white text-2xl font-bold">×</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView>
             <View className="flex-row items-center bg-gray-800 p-3 rounded-lg mb-4">
               <Image source={{ uri: activity.image }} className="w-12 h-12 rounded-lg mr-3" />
               <Text className="text-white text-base font-semibold">{activity.name}</Text>
@@ -233,7 +238,6 @@ export const ActivityChatPopup = ({
               />
             )}
 
-            {/* Action Buttons */}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity
                 onPress={onClose}

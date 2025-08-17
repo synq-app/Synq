@@ -189,6 +189,10 @@ export const Explore = ({ navigation }: { navigation: any }) => {
           visible={chatPopupVisible}
           onClose={() => setChatPopupVisible(false)}
           activity={selectedActivity}
+          onCloseAndNavigateBack={() => {
+            setChatPopupVisible(false); // Close the popup
+            navigation.goBack(); // Go back to the previous screen
+          }}
         />
       )}
     </View>
