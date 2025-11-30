@@ -1,0 +1,67 @@
+// app.config.js
+/** @type {import('@expo/config').ExpoConfig} */
+module.exports = {
+  // 🔑 This is correct and mandatory for EAS
+  owner: "stefaniebaarman", 
+  
+  name: 'Synq',
+  slug: 'Synq',
+  version: '1.0.0',
+  orientation: 'portrait',
+  icon: './src/assets/images/icon.png',
+  scheme: 'synqapp',
+  userInterfaceStyle: 'dark',
+  splash: {
+    image: './src/assets/images/splash.png',
+    resizeMode: 'contain',
+    backgroundColor: '#ffffff',
+  },
+  updates: {
+    fallbackToCacheTimeout: 0,
+    url: "https://u.expo.dev/bde1f0ad-c50e-40a3-9066-63a1b4ebdfc8",
+    
+    // 🔑 ADD THIS BLOCK: Resolves the 'expoUsername' of 'undefined' error
+    runtimeVersion: {
+      policy: "appVersion" 
+    }
+  },
+  assetBundlePatterns: ['**/*'],
+  ios: {
+    bundleIdentifier: 'com.elliotttang.synq',
+    supportsTablet: true,
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+    },
+  },
+  android: {
+    package: 'com.elliotttang.synq',
+    adaptiveIcon: {
+      foregroundImage: './src/assets/images/adaptive-icon.png',
+      backgroundColor: '#ffffff',
+    },
+    // 🔑 ADD THIS LINE: To fully satisfy the Android config plugin that is currently crashing the prebuild
+    publishSource: "self" 
+  },
+  web: {
+    favicon: './src/assets/images/favicon.png',
+  },
+  platforms: ['ios', 'android', 'web'],
+  plugins: [
+    'expo-asset',
+    'expo-font',
+    'expo-web-browser',
+    [
+      'expo-build-properties',
+      {
+        ios: {
+          useFrameworks: 'static' 
+        }
+      }
+    ]
+  ],
+  extra: {
+    eas: {
+      projectId: 'bde1f0ad-c50e-40a3-9066-63a1b4ebdfc8',
+    },
+  },
+};

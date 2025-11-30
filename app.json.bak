@@ -19,13 +19,18 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.elliotttang.synq",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.elliotttang.synq",
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
+      }
     },
     "web": {
       "favicon": "./src/assets/images/favicon.png"
@@ -37,7 +42,21 @@
     ],
     "plugins": [
       "expo-asset",
-      "expo-font"
-    ]
+      "expo-font",
+      "expo-web-browser",
+      [
+  "expo-build-properties",
+  {
+    "ios": {
+      "useFrameworks": "static"
+    }
+  }
+]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "bde1f0ad-c50e-40a3-9066-63a1b4ebdfc8"
+      }
+    }
   }
 }
