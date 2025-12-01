@@ -11,6 +11,11 @@ npm-debug.*
 *.orig.*
 web-build/
 config.js
-
+# Expo/Build Cache
+.expo
+.expo-shared
+node_modules
+ios/build/
+android/build/
 # macOS
 .DS_Store
