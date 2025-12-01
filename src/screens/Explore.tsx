@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Text, View } from '../components/Themed';
 import axios from 'axios';
-import { ENV_VARS } from '../../config';
+import { ENV_VARS } from '../../config.js';
 import ChatPopup from './ChatPopup';
 import { ActivityChatPopup } from './ActivityChatPopup';
 

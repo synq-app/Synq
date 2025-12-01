@@ -5,7 +5,7 @@ import { SvgXml } from 'react-native-svg';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { auth, signInWithPhoneNumber, app } from "./firebaseConfig";
 import axios from 'axios';
-import { ENV_VARS } from '../../../config';
+import { ENV_VARS } from '../../../config.js';
 
 export default function ScreenThree({ navigation }: any) {
     const [phoneNumber, setPhoneNumber] = useState("");

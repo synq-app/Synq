@@ -4,7 +4,7 @@ import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 import * as Location from 'expo-location';
-import { ENV_VARS } from '../../config';
+import { ENV_VARS } from '../../config.js';
 
 const db = getFirestore();
 const auth = getAuth();

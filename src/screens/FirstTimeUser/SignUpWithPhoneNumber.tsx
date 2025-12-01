@@ -16,7 +16,7 @@ import {
 import { SynqButton } from '../../components/Themed';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import axios from 'axios';
-import { ENV_VARS } from '../../../config';
+import { ENV_VARS } from '../../../config.js';
 
 interface AuthProps {
   navigation: any;

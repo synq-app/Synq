@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPhoneNumber, signInWithEmailAndPassword, createUserWithEmailAndPassword, initializeAuth } from "firebase/auth"; // Import necessary Firebase Auth methods
 import 'firebase/firestore';
 import { getStorage } from "firebase/storage";
-import { ENV_VARS } from '../../../config';
+import { ENV_VARS } from '../../../config.js';
 
 
 const firebaseConfig = {
